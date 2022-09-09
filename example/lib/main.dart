@@ -15,16 +15,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String url =
+      'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.amber[50],
-      appBar: AppBar(title: const Text('Simple Example')),
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text('Simple Example'),
+        backgroundColor: Colors.grey,
+      ),
       body: Center(
         child: SimplePlayer.network(
           simplePlayerSettings: SimplePlayerSettings(
-            url:
-                'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
+            simplePathType: SimplePathType.network(url: url),
+            aspectRatio: 16 / 9,
+            autoPlay: false,
           ),
         ),
       ),
