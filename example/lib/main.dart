@@ -17,6 +17,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String url =
       'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,10 +29,10 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: SimplePlayer.network(
           simplePlayerSettings: SimplePlayerSettings(
-            simplePathType: SimplePathType.network(url: url),
-            aspectRatio: 16 / 9,
-            autoPlay: false,
-          ),
+              simplePathType: SimplePathType.network(url: url),
+              aspectRatio: 16 / 9,
+              autoPlay: false,
+              label: 'Bee'),
         ),
       ),
     );

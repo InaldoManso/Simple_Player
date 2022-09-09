@@ -24,9 +24,11 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   //Attributes
   late VideoPlayerController _videoPlayerController;
   late AnimationController _animationController;
-  double _currentSeconds = 0.0;
-  double _totalSeconds = 0.0;
-  bool _isMuted = true;
+  double? _currentSeconds = 0.0;
+  double? _totalSeconds = 0.0;
+  String? _tittle = '';
+  bool? _loopMode = true;
+  bool? _isMuted = true;
 
   _fullScreenManager() {
     final sps = SimplePlayerState(currentSenconds: _currentSeconds);
@@ -46,21 +48,24 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   _muteToggle() {
-    if (_isMuted) {
+    if (_isMuted!) {
       _videoPlayerController.setVolume(1.0);
     } else {
       _videoPlayerController.setVolume(0.0);
     }
     setState(() {
-      _isMuted = !_isMuted;
+      _isMuted = !_isMuted!;
     });
   }
 
-  _playToggle() {
-    if (_videoPlayerController.value.isPlaying) {
+  _playAndPauseSwitch() {
+    bool playing = _videoPlayerController.value.isPlaying;
+    if (playing) {
+      //pause
       _animationController.reverse();
       _videoPlayerController.pause();
     } else {
+      //play
       _animationController.forward();
       _videoPlayerController.play();
     }
@@ -74,8 +79,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           () {
             _totalSeconds =
                 _videoPlayerController.value.duration.inMilliseconds.toDouble();
-            _videoPlayerController.setLooping(true);
-            _videoPlayerController.setVolume(0.5);
+            _videoPlayerController.setLooping(_loopMode!);
+            _videoPlayerController.setVolume(0.0);
           },
         ),
       );
@@ -97,8 +102,10 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   _initializeInterface() {
+    simplePlayerSettings = widget.simplePlayerSettings;
     setState(() {
-      simplePlayerSettings = widget.simplePlayerSettings;
+      _loopMode = simplePlayerSettings.autoPlay!;
+      _tittle = simplePlayerSettings.label;
     });
 
     //Methods
@@ -121,10 +128,15 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           children: [
             VideoPlayer(_videoPlayerController),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
                   child: Container(
                     color: Colors.black.withOpacity(0.5),
+                    child: Text(
+                      _tittle!,
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
                 Expanded(
@@ -141,14 +153,14 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                               icon: AnimatedIcons.play_pause,
                               color: Colors.white,
                               progress: _animationController),
-                          onPressed: () => _playToggle(),
+                          onPressed: () => _playAndPauseSwitch(),
                         ),
                         Expanded(
                           child: Slider(
-                            value: _currentSeconds,
+                            value: _currentSeconds!,
+                            max: _totalSeconds!,
                             min: 0,
-                            max: _totalSeconds,
-                            // label: label,
+                            label: _currentSeconds.toString(),
                             activeColor: Colors.orangeAccent,
                             onChanged: (double value) {
                               _jumpTo(value);
@@ -157,7 +169,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                         ),
                         IconButton(
                           icon: Icon(
-                              _isMuted ? Icons.volume_mute : Icons.volume_up,
+                              _isMuted! ? Icons.volume_mute : Icons.volume_up,
                               color: Colors.white),
                           onPressed: () {
                             _muteToggle();
