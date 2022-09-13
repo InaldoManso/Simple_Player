@@ -5,11 +5,13 @@ class SimplePlayerSettings {
   String? label = '';
   double? aspectRatio = 16 / 9;
   bool? autoPlay = false;
+  bool? loopMode = false;
 
   SimplePlayerSettings({
     required this.simplePathType,
     this.label = '',
     this.aspectRatio = 16 / 9,
     this.autoPlay = false,
+    this.loopMode = false,
   });
 }

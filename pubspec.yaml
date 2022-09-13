@@ -1,14 +1,15 @@
 name: simple_player
 description: Package for simplified video playback.
-version: 1.0.0
+version: 0.0.1
 homepage: https://github.com/InaldoManso/Simple_Player
 
 environment:
-  sdk: ">=2.17.6 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
   video_player: ">2.4.6 <3.0.0"
+  snapping_sheet: ^3.1.0
   flutter:
     sdk: flutter
 

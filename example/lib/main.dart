@@ -29,10 +29,12 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: SimplePlayer.network(
           simplePlayerSettings: SimplePlayerSettings(
-              simplePathType: SimplePathType.network(url: url),
-              aspectRatio: 16 / 9,
-              autoPlay: false,
-              label: 'Bee'),
+            simplePathType: SimplePathType.network(url: url),
+            aspectRatio: 16 / 9,
+            autoPlay: false,
+            loopMode: false,
+            label: 'Bee',
+          ),
         ),
       ),
     );
