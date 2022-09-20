@@ -21,20 +21,56 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Simple Example'),
         backgroundColor: Colors.grey,
       ),
-      body: Center(
-        child: SimplePlayer.network(
-          simplePlayerSettings: SimplePlayerSettings(
-            simplePathType: SimplePathType.network(url: url),
-            aspectRatio: 16 / 9,
-            autoPlay: false,
-            loopMode: false,
-            label: 'Bee',
-          ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              color: Colors.blue,
+              height: 200,
+            ),
+            SimplePlayer.network(
+              simplePlayerSettings: SimplePlayerSettings(
+                simplePathType: SimplePathType.network(url: url),
+                aspectRatio: 16 / 9,
+                autoPlay: false,
+                loopMode: false,
+                label: 'Bee',
+              ),
+            ),
+            Container(
+              color: Colors.amber,
+              height: 200,
+            ),
+            Container(
+              color: Colors.red,
+              height: 200,
+            ),
+            Container(
+              color: Colors.purple,
+              height: 200,
+            ),
+            Container(
+              color: Colors.orange,
+              height: 200,
+            ),
+            Container(
+              color: Colors.green,
+              height: 200,
+            ),
+            Container(
+              color: Colors.blue,
+              height: 200,
+            ),
+            Container(
+              color: Colors.amber,
+              height: 200,
+            ),
+          ],
         ),
       ),
     );

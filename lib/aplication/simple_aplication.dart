@@ -20,4 +20,20 @@ class SimpleAplication {
         return VideoPlayerController.network(example);
     }
   }
+
+  String volumeConvert(double volume) {
+    if (volume == 0.05) {
+      return '5%';
+    } else if (volume == 1.0) {
+      return '100%';
+    } else {
+      int value = int.parse(volume.toStringAsPrecision(2).replaceAll('.', ''));
+      return '$value%';
+    }
+  }
+
+  String speedConvert(double volume) {
+    String value = volume.toStringAsPrecision(2);
+    return '$value x';
+  }
 }
