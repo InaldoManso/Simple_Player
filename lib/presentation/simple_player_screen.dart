@@ -72,14 +72,12 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   _muteToggle() {
     if (_isMuted!) {
       _volumeSetter(_lastVolume);
+      setState(() => _isMuted = false);
     } else {
       _lastVolume = _volume;
       _volumeSetter(0.0);
+      setState(() => _isMuted = true);
     }
-    setState(() {
-      _lastVolume = _lastVolume;
-      _isMuted = !_isMuted!;
-    });
   }
 
   _visibleControlManager(double position) {
@@ -149,6 +147,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   _sheetTap() {
+    print('tap');
     if (_visibleSheetControls!) {
       _snappingSheetController.snapToPosition(const SnappingPosition.factor(
           positionFactor: 1.0,
@@ -232,7 +231,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           snappingPositions: const [
             SnappingPosition.factor(
                 //left position:
-                positionFactor: 0.0,
+                positionFactor: 0.2,
                 snappingCurve: Curves.easeOutCirc,
                 snappingDuration: Duration(milliseconds: 700),
                 grabbingContentOffset: GrabbingContentOffset.top),
@@ -253,32 +252,31 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           onSnapCompleted: (sheetPosition, snappingPosition) {
             _sheetMove(sheetPosition.relativeToSnappingPositions);
           },
-          grabbingWidth: width * 0.2,
-          grabbing: Container(
-            color: Colors.transparent,
-            padding: const EdgeInsets.only(left: 8),
-            margin: const EdgeInsets.only(bottom: 45),
-            child: Visibility(
-              visible: _visibleControls!,
-              child: const Icon(
-                Icons.swipe_left_outlined,
-                color: Colors.white,
-                shadows: [
-                  Shadow(
-                    blurRadius: 13.0,
-                    color: Colors.black45,
-                    offset: Offset(3.0, 2.0),
-                  ),
-                ],
-              ),
-            ),
-          ),
           sheetLeft: SnappingSheetContent(
             draggable: true,
-            child: Container(
+            child: GestureDetector(
+              onTap: () => _sheetTap(),
+              child: Container(
                 color: Colors.transparent,
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.only(bottom: 45),
-                child: GestureDetector(onTap: () => _sheetTap())),
+                child: Visibility(
+                  visible: _visibleControls!,
+                  child: const Icon(
+                    Icons.swipe_left_outlined,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 13.0,
+                        color: Colors.black45,
+                        offset: Offset(3.0, 2.0),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
           sheetRight: SnappingSheetContent(
             sizeBehavior: const SheetSizeFill(),
