@@ -188,6 +188,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
       () {
         bool playing = _videoPlayerController.value.isPlaying;
         if (_currentSeconds == _totalSeconds && !playing) {
+          _showAndHideControls(true);
           _animationController.reverse();
           _jumpTo(0.0);
         }
