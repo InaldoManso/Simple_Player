@@ -1,3 +1,4 @@
+import 'package:simple_player/core/date_formatter.dart';
 import 'package:simple_player/presentation/simple_player_fullscreen.dart';
 import 'package:simple_player/aplication/simple_aplication.dart';
 import 'package:simple_player/model/simple_player_settings.dart';
@@ -7,6 +8,7 @@ import 'package:simple_player/simple_player.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:math';
 
 class SimplePlayerScrren extends StatefulWidget {
   final SimplePlayerSettings simplePlayerSettings;
@@ -27,21 +29,21 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   final SnappingSheetController _snappingSheetController =
       SnappingSheetController();
   late VideoPlayerController _videoPlayerController;
-  // late VideoPlayerController _videoPlayerController2;
   late AnimationController _animationController;
   double? _currentSeconds = 0.0;
   double? _totalSeconds = 0.0;
   double? _lastVolume = 0.0;
   double? _volume = 0.0;
   double? _speed = 1.0;
+  String? _showTime = '-:-';
   String? _tittle = '';
-  // bool? _finishIntro = false;
   bool? _visibleSheetControls = false;
   bool? _visibleControls = true;
   bool? _autoPlay = true;
   bool? _loopMode = true;
   bool? _isMuted = false;
   bool? _wasPlaying = false;
+  bool? _confortMode = false;
 
   //Default
   final SnappingPosition _initPosition = const SnappingPosition.factor(
@@ -65,8 +67,16 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   _speedSetter(double? speed) async {
-    _speed = speed;
+    setState(() => _speed = speed);
     _videoPlayerController.setPlaybackSpeed(speed!);
+  }
+
+  _confortToggle() {
+    if (_confortMode!) {
+      setState(() => _confortMode = false);
+    } else {
+      setState(() => _confortMode = true);
+    }
   }
 
   _muteToggle() {
@@ -172,6 +182,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           _videoPlayerController.setLooping(_loopMode!);
           _videoPlayerController.setVolume(0.0);
         });
+
+        //After settings
         _autoPlayChecker(_autoPlay);
         _volumeSetter(0.3);
       });
@@ -192,9 +204,14 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           _animationController.reverse();
           _jumpTo(0.0);
         }
+        double minutes =
+            _videoPlayerController.value.position.inMinutes.toDouble();
+        int seconds = _videoPlayerController.value.position.inSeconds;
         setState(() {
           _currentSeconds =
               _videoPlayerController.value.position.inMilliseconds.toDouble();
+          _showTime = DateFormatter()
+              .currentTime(_videoPlayerController.value.position);
         });
       },
     );
@@ -211,7 +228,6 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     //Methods
     _setupControllers(simplePlayerSettings);
     _secondsListener();
-    // _animateSheet();
   }
 
   @override
@@ -222,6 +238,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return Center(
       child: AspectRatio(
@@ -256,27 +273,25 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           sheetLeft: SnappingSheetContent(
             draggable: true,
             child: GestureDetector(
-              onTap: () => _sheetTap(),
               child: Container(
                 color: Colors.transparent,
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.only(bottom: 45),
+                padding: const EdgeInsets.only(top: 50),
+                margin: const EdgeInsets.only(bottom: 50),
                 child: Visibility(
                   visible: _visibleControls!,
-                  child: const Icon(
-                    Icons.swipe_left_outlined,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 13.0,
-                        color: Colors.black45,
-                        offset: Offset(3.0, 2.0),
-                      ),
-                    ],
+                  child: Center(
+                    child: IconButton(
+                      icon: AnimatedIcon(
+                          size: 40,
+                          color: Colors.white,
+                          icon: AnimatedIcons.play_pause,
+                          progress: _animationController),
+                      onPressed: () => _playAndPauseSwitch(),
+                    ),
                   ),
                 ),
               ),
+              onTap: () => _sheetTap(),
             ),
           ),
           sheetRight: SnappingSheetContent(
@@ -321,34 +336,81 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                       child: Text('Velocidade de reprodução:',
                           style: TextStyle(color: Colors.white)),
                     ),
-                    SliderTheme(
-                      data: _sliderTheme(),
-                      child: Slider(
-                        value: _speed!,
-                        max: 2.0,
-                        min: 0.1,
-                        divisions: 19,
-                        label: simpleAplication.speedConvert(_speed!),
-                        onChanged: (double value) {
-                          _speedSetter(value);
-                        },
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                            child: TextButton(
+                                child: Text('0.5x',
+                                    style: TextStyle(
+                                        color: _speed == 0.5
+                                            ? Colors.red
+                                            : Colors.white)),
+                                onPressed: () => _speedSetter(0.5))),
+                        Expanded(
+                            child: TextButton(
+                                child: Text('1.0x',
+                                    style: TextStyle(
+                                        color: _speed == 1.0
+                                            ? Colors.red
+                                            : Colors.white)),
+                                onPressed: () => _speedSetter(1.0))),
+                        Expanded(
+                            child: TextButton(
+                                child: Text('1.5x',
+                                    style: TextStyle(
+                                        color: _speed == 1.5
+                                            ? Colors.red
+                                            : Colors.white)),
+                                onPressed: () => _speedSetter(1.5))),
+                        Expanded(
+                            child: TextButton(
+                                child: Text('2.0x',
+                                    style: TextStyle(
+                                        color: _speed == 2.0
+                                            ? Colors.red
+                                            : Colors.white)),
+                                onPressed: () => _speedSetter(2.0))),
+                      ],
                     ),
                     Expanded(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          IconButton(
-                            icon: Icon(
-                                _isMuted! ? Icons.volume_mute : Icons.volume_up,
-                                color: Colors.white),
-                            onPressed: () {
-                              _muteToggle();
-                            },
+                          Material(
+                            color: Colors.transparent,
+                            child: IconButton(
+                              tooltip: 'Modo confortável: suaviza as cores.',
+                              padding: EdgeInsets.zero,
+                              splashRadius: 20,
+                              icon: Icon(Icons.nights_stay,
+                                  color: _confortMode!
+                                      ? Colors.orange
+                                      : Colors.white),
+                              onPressed: () {
+                                _confortToggle();
+                              },
+                            ),
                           ),
                           Material(
                             color: Colors.transparent,
                             child: IconButton(
+                              padding: EdgeInsets.zero,
+                              splashRadius: 20,
+                              icon: Icon(
+                                  _isMuted!
+                                      ? Icons.volume_mute
+                                      : Icons.volume_up,
+                                  color: _isMuted! ? Colors.red : Colors.white),
+                              onPressed: () {
+                                _muteToggle();
+                              },
+                            ),
+                          ),
+                          Material(
+                            color: Colors.transparent,
+                            child: IconButton(
+                              tooltip: 'Reset',
                               padding: EdgeInsets.zero,
                               splashRadius: 20,
                               icon: const Icon(
@@ -357,6 +419,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                               ),
                               onPressed: () {
                                 _speedSetter(1.0);
+                                _volumeSetter(0.3);
                               },
                             ),
                           )
@@ -371,55 +434,61 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           child: Stack(
             children: [
               VideoPlayer(_videoPlayerController),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Visibility(
-                    visible: _visibleControls!,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Text(
-                        _tittle!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 10.0,
-                              color: Colors.black,
-                              offset: Offset(3.0, 2.0),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    transitionBuilder:
-                        (Widget child, Animation<double> animation) {
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-                    child: _visibleControls!
-                        ? Container(
-                            key: const ValueKey('a'),
-                            height: 45,
-                            decoration: const BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(24),
-                                topRight: Radius.circular(24),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: _visibleControls!
+                    ? Container(
+                        key: const ValueKey('a'),
+                        height: width,
+                        color: Colors.black.withOpacity(0.2),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                _tittle!,
+                                textAlign: TextAlign.left,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  shadows: [
+                                    Shadow(
+                                      blurRadius: 10.0,
+                                      color: Colors.black,
+                                      offset: Offset(3.0, 2.0),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            child: Row(
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.only(right: 16),
+                                alignment: Alignment.centerRight,
+                                child: const Icon(
+                                  Icons.swipe_left_outlined,
+                                  color: Colors.white,
+                                  shadows: [
+                                    Shadow(
+                                      blurRadius: 13.0,
+                                      color: Colors.black45,
+                                      offset: Offset(3.0, 2.0),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                IconButton(
-                                  icon: AnimatedIcon(
-                                      icon: AnimatedIcons.play_pause,
-                                      color: Colors.white,
-                                      progress: _animationController),
-                                  onPressed: () => _playAndPauseSwitch(),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16),
+                                  child: Text(_showTime!,
+                                      style:
+                                          const TextStyle(color: Colors.white)),
                                 ),
                                 Expanded(
                                     child: SliderTheme(
@@ -435,16 +504,27 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                                   ),
                                 )),
                                 IconButton(
-                                  icon: const Icon(Icons.fullscreen,
-                                      color: Colors.white),
+                                  padding: EdgeInsets.all(0),
+                                  icon: const Icon(
+                                    Icons.fullscreen,
+                                    color: Colors.white,
+                                  ),
                                   onPressed: () => _fullScreenManager(),
                                 ),
                               ],
                             ),
-                          )
-                        : Container(key: const ValueKey('b'), height: 45),
-                  ),
-                ],
+                          ],
+                        ),
+                      )
+                    : AnimatedContainer(
+                        duration: const Duration(seconds: 1),
+                        key: const ValueKey('b'),
+                        color: _confortMode!
+                            ? Colors.deepOrange.withOpacity(0.1)
+                            : Colors.transparent,
+                        height: height,
+                        width: width,
+                      ),
               )
             ],
           ),
