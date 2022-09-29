@@ -142,6 +142,48 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.2"
+  screen_brightness:
+    dependency: transitive
+    description:
+      name: screen_brightness
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.2"
+  screen_brightness_android:
+    dependency: transitive
+    description:
+      name: screen_brightness_android
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0"
+  screen_brightness_ios:
+    dependency: transitive
+    description:
+      name: screen_brightness_ios
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0"
+  screen_brightness_macos:
+    dependency: transitive
+    description:
+      name: screen_brightness_macos
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0+1"
+  screen_brightness_platform_interface:
+    dependency: transitive
+    description:
+      name: screen_brightness_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0"
+  screen_brightness_windows:
+    dependency: transitive
+    description:
+      name: screen_brightness_windows
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0"
   simple_player:
     dependency: "direct dev"
     description:
@@ -245,6 +287,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.12"
+  volume_controller:
+    dependency: transitive
+    description:
+      name: volume_controller
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.4"
 sdks:
   dart: ">=2.17.0 <3.0.0"
   flutter: ">=2.10.0"

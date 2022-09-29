@@ -21,7 +21,7 @@ class SimpleAplication {
     }
   }
 
-  String volumeConvert(double volume) {
+  String doubleConvert(double volume) {
     if (volume == 0.05) {
       return '5%';
     } else if (volume == 1.0) {

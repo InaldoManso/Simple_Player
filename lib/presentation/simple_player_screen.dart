@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+import 'package:screen_brightness/screen_brightness.dart';
 import 'package:simple_player/core/date_formatter.dart';
 import 'package:simple_player/presentation/simple_player_fullscreen.dart';
 import 'package:simple_player/aplication/simple_aplication.dart';
@@ -9,6 +11,8 @@ import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
+
+import 'package:volume_controller/volume_controller.dart';
 
 class SimplePlayerScrren extends StatefulWidget {
   final SimplePlayerSettings simplePlayerSettings;
@@ -30,10 +34,12 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
       SnappingSheetController();
   late VideoPlayerController _videoPlayerController;
   late AnimationController _animationController;
+  VolumeController _volumeController = VolumeController();
   double? _currentSeconds = 0.0;
   double? _totalSeconds = 0.0;
   double? _lastVolume = 0.0;
   double? _volume = 0.0;
+  double? _brightness = 0.0;
   double? _speed = 1.0;
   String? _showTime = '-:-';
   String? _tittle = '';
@@ -49,21 +55,36 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   final SnappingPosition _initPosition = const SnappingPosition.factor(
       positionFactor: 1.0, grabbingContentOffset: GrabbingContentOffset.bottom);
 
-  _showAndHideControls(bool show) {
-    setState(() {
-      _visibleControls = show;
+  _initializeSliders() async {
+    _volumeController.getVolume().then((value) {
+      _volumeSetter(value);
+    });
+    ScreenBrightness().current.then((value) {
+      _brightnessSetter(value);
     });
   }
 
-  _volumeSetter(double? volume) async {
-    _volume = volume;
-    _videoPlayerController.setVolume(volume!);
+  _brightnessSetter(double brightness) async {
+    setState(() => _brightness = brightness);
+    ScreenBrightness().setScreenBrightness(brightness);
+  }
+
+  _volumeSetter(double volume) async {
+    _videoPlayerController.setVolume(volume);
+    _volumeController.setVolume(volume, showSystemUI: false);
+    setState(() => _volume = volume);
 
     if (volume > 0.0 && _isMuted!) {
       setState(() => _isMuted = false);
     } else if (volume == 0.0) {
       setState(() => _isMuted = true);
     }
+  }
+
+  _showAndHideControls(bool show) {
+    setState(() {
+      _visibleControls = show;
+    });
   }
 
   _speedSetter(double? speed) async {
@@ -81,7 +102,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
 
   _muteToggle() {
     if (_isMuted!) {
-      _volumeSetter(_lastVolume);
+      _volumeSetter(_lastVolume!);
       setState(() => _isMuted = false);
     } else {
       _lastVolume = _volume;
@@ -183,16 +204,17 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           _videoPlayerController.setVolume(0.0);
         });
 
-        //After settings
+        //Methods after settings
         _autoPlayChecker(_autoPlay);
-        _volumeSetter(0.3);
+        _initializeSliders();
       });
 
     //Icons controller
     _animationController = AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 400),
-        reverseDuration: const Duration(milliseconds: 400));
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+      reverseDuration: const Duration(milliseconds: 400),
+    );
   }
 
   _secondsListener() {
@@ -313,119 +335,16 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(left: 16),
-                      child: Text('Volume:',
-                          style: TextStyle(color: Colors.white)),
+                    Expanded(child: _volumeWidget()),
+                    Expanded(child: _brightnessWidget()),
+                    Expanded(child: _playbackSpeedWidget()),
+                    const Divider(
+                      color: Colors.white,
+                      indent: 8,
+                      endIndent: 8,
+                      height: 4,
                     ),
-                    SliderTheme(
-                      data: _sliderTheme(),
-                      child: Slider(
-                        value: _volume!,
-                        max: 1.0,
-                        min: 0.0,
-                        divisions: 20,
-                        label: simpleAplication.volumeConvert(_volume!),
-                        onChanged: (double value) {
-                          _volumeSetter(value);
-                        },
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 16),
-                      child: Text('Velocidade de reprodução:',
-                          style: TextStyle(color: Colors.white)),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                            child: TextButton(
-                                child: Text('0.5x',
-                                    style: TextStyle(
-                                        color: _speed == 0.5
-                                            ? Colors.red
-                                            : Colors.white)),
-                                onPressed: () => _speedSetter(0.5))),
-                        Expanded(
-                            child: TextButton(
-                                child: Text('1.0x',
-                                    style: TextStyle(
-                                        color: _speed == 1.0
-                                            ? Colors.red
-                                            : Colors.white)),
-                                onPressed: () => _speedSetter(1.0))),
-                        Expanded(
-                            child: TextButton(
-                                child: Text('1.5x',
-                                    style: TextStyle(
-                                        color: _speed == 1.5
-                                            ? Colors.red
-                                            : Colors.white)),
-                                onPressed: () => _speedSetter(1.5))),
-                        Expanded(
-                            child: TextButton(
-                                child: Text('2.0x',
-                                    style: TextStyle(
-                                        color: _speed == 2.0
-                                            ? Colors.red
-                                            : Colors.white)),
-                                onPressed: () => _speedSetter(2.0))),
-                      ],
-                    ),
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Material(
-                            color: Colors.transparent,
-                            child: IconButton(
-                              tooltip: 'Modo confortável: suaviza as cores.',
-                              padding: EdgeInsets.zero,
-                              splashRadius: 20,
-                              icon: Icon(Icons.nights_stay,
-                                  color: _confortMode!
-                                      ? Colors.orange
-                                      : Colors.white),
-                              onPressed: () {
-                                _confortToggle();
-                              },
-                            ),
-                          ),
-                          Material(
-                            color: Colors.transparent,
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              splashRadius: 20,
-                              icon: Icon(
-                                  _isMuted!
-                                      ? Icons.volume_mute
-                                      : Icons.volume_up,
-                                  color: _isMuted! ? Colors.red : Colors.white),
-                              onPressed: () {
-                                _muteToggle();
-                              },
-                            ),
-                          ),
-                          Material(
-                            color: Colors.transparent,
-                            child: IconButton(
-                              tooltip: 'Reset',
-                              padding: EdgeInsets.zero,
-                              splashRadius: 20,
-                              icon: const Icon(
-                                Icons.replay_rounded,
-                                color: Colors.white,
-                              ),
-                              onPressed: () {
-                                _speedSetter(1.0);
-                                _volumeSetter(0.3);
-                              },
-                            ),
-                          )
-                        ],
-                      ),
-                    )
+                    Expanded(child: _moreButtonsWidget())
                   ],
                 ),
               ),
@@ -530,6 +449,131 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _volumeWidget() {
+    return Row(
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 16),
+          child: Icon(Icons.volume_up_rounded, color: Colors.white),
+        ),
+        Expanded(
+          child: SliderTheme(
+            data: _sliderTheme(),
+            child: Slider(
+              value: _volume!,
+              max: 1.0,
+              min: 0.0,
+              divisions: 20,
+              label: simpleAplication.doubleConvert(_volume!),
+              onChanged: (double value) {
+                _volumeSetter(value);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _brightnessWidget() {
+    return Row(
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 16),
+          child: Icon(Icons.settings_brightness_rounded, color: Colors.white),
+        ),
+        Expanded(
+          child: SliderTheme(
+            data: _sliderTheme(),
+            child: Slider(
+              value: _brightness!,
+              max: 1.0,
+              min: 0.0,
+              divisions: 20,
+              label: simpleAplication.doubleConvert(_brightness!),
+              onChanged: (double value) {
+                _brightnessSetter(value);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _playbackSpeedWidget() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 16),
+          child: Icon(Icons.slow_motion_video_rounded, color: Colors.white),
+        ),
+        Expanded(
+            child: TextButton(
+                child: Text('0.5x',
+                    style: TextStyle(
+                        color: _speed == 0.5 ? Colors.red : Colors.white)),
+                onPressed: () => _speedSetter(0.5))),
+        Expanded(
+            child: TextButton(
+                child: Text('1.0x',
+                    style: TextStyle(
+                        color: _speed == 1.0 ? Colors.red : Colors.white)),
+                onPressed: () => _speedSetter(1.0))),
+        Expanded(
+            child: TextButton(
+                child: Text('1.5x',
+                    style: TextStyle(
+                        color: _speed == 1.5 ? Colors.red : Colors.white)),
+                onPressed: () => _speedSetter(1.5))),
+        Expanded(
+            child: TextButton(
+                child: Text('2.0x',
+                    style: TextStyle(
+                        color: _speed == 2.0 ? Colors.red : Colors.white)),
+                onPressed: () => _speedSetter(2.0))),
+      ],
+    );
+  }
+
+  Widget _moreButtonsWidget() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: IconButton(
+            tooltip: 'Modo confortável: suaviza as cores.',
+            splashRadius: 20,
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            splashColor: Colors.orangeAccent,
+            icon: Icon(Icons.nights_stay,
+                color: _confortMode! ? Colors.orange : Colors.white),
+            onPressed: () {
+              _confortToggle();
+            },
+          ),
+        ),
+        Material(
+          color: Colors.transparent,
+          child: IconButton(
+            splashRadius: 20,
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            splashColor: Colors.redAccent,
+            icon: Icon(_isMuted! ? Icons.volume_mute : Icons.volume_up,
+                color: _isMuted! ? Colors.red : Colors.white),
+            onPressed: () {
+              _muteToggle();
+            },
+          ),
+        ),
+      ],
     );
   }
 
