@@ -43,18 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     aspectRatio: 16 / 9,
                     autoPlay: false,
                     loopMode: false,
-                    colorAccent: Colors.red),
-              ),
-            ),
-            SizedBox(
-              width: width * 1,
-              child: SimplePlayer.build(
-                simplePlayerSettings: SimplePlayerSettings(
-                  simplePathType: SimplePathType.network(url: url),
-                  autoPlay: false,
-                  loopMode: false,
-                  label: 'Bee',
-                ),
+                    colorAccent: Colors.amber[600]),
               ),
             ),
             Container(
@@ -70,19 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
               height: 200,
             ),
             Container(
-              color: Colors.orange,
-              height: 200,
-            ),
-            Container(
-              color: Colors.green,
-              height: 200,
-            ),
-            Container(
               color: Colors.blue,
-              height: 200,
-            ),
-            Container(
-              color: Colors.amber,
               height: 200,
             ),
           ],

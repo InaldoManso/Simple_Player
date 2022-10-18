@@ -78,6 +78,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     bool playing = _videoPlayerController.value.isPlaying;
     if (position > 0.5 && !playing) {
       //play
+      print('estava tocando : $_wasPlaying');
       if (_wasPlaying!) {
         _playAndPauseSwitch();
       } else {

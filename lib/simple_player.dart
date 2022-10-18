@@ -41,7 +41,14 @@ class SimplePlayer {
   ///
   /// {@tool snippet}
   ///
-  /// ![bee](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
+  ///The player should behave like this:
+  ///
+  /// ![bee](https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/bee.png)
+  ///
+  ///Good coding! 😎💙
+  ///
+  ///Follow me on:
+  ///https://github.com/InaldoManso
 
   static Widget build({SimplePlayerSettings? simplePlayerSettings}) {
     return SimplePlayerScrren(simplePlayerSettings: simplePlayerSettings!);
