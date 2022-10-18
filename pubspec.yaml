@@ -1,6 +1,6 @@
 name: simple_player
 description: Package for simplified video playback.
-version: 0.0.1
+version: 1.0.1
 homepage: https://github.com/InaldoManso/Simple_Player
 
 environment:
