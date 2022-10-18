@@ -1,9 +1,5 @@
-# Simple Player 
+# Simple Player🎬
 ## Welcome to the simplest user-friendly player ever made!
-
-Welcome to the simplest user-friendly player ever made!
-
-</br>
 
 ### Applicable preferences:
 - Title (String)

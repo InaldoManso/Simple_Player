@@ -1,9 +1,14 @@
+## 1.0.2 - SimplePlayer Organizing SimplePlayer
+
+* Functional package accepts videos via network and via assets path.
+* Edit Readme*
+
 ## 1.0.2 - SimplePlayer BetaOn
 
 * Functional package accepts videos via network and via assets path.
 * Edit Readme
 
-## 1.0.1 - SimplePlayer BetaOn
+## 1.0.1 - SimplePlayer
 
 * Functional package accepts videos via network and via assets path.
 
