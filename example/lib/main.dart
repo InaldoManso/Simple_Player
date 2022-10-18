@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:simple_player/simple_player.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   runApp(const MaterialApp(

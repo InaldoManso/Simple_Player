@@ -145,11 +145,15 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     _videoPlayerController.seekTo(Duration(milliseconds: value.toInt()));
   }
 
-  _playAndPauseSwitch() {
+  _playAndPauseSwitch({bool pauseButton = false}) {
     bool playing = _videoPlayerController.value.isPlaying;
     if (playing) {
       //pause
-      _wasPlaying = playing;
+      if (pauseButton) {
+        _wasPlaying = !playing;
+      } else {
+        _wasPlaying = playing;
+      }
       _animationController.reverse();
       _videoPlayerController.pause();
     } else {
@@ -292,7 +296,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                           color: Colors.white,
                           icon: AnimatedIcons.play_pause,
                           progress: _animationController),
-                      onPressed: () => _playAndPauseSwitch(),
+                      onPressed: () => _playAndPauseSwitch(pauseButton: true),
                     ),
                   ),
                 ),

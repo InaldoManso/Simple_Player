@@ -113,11 +113,15 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     }
   }
 
-  _playAndPauseSwitch() {
+  _playAndPauseSwitch({bool pauseButton = false}) {
     bool playing = _videoPlayerController.value.isPlaying;
     if (playing) {
       //pause
-      _wasPlaying = playing;
+      if (pauseButton) {
+        _wasPlaying = !playing;
+      } else {
+        _wasPlaying = playing;
+      }
       _animationController.reverse();
       _videoPlayerController.pause();
     } else {
@@ -290,7 +294,8 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
                                 color: Colors.white,
                                 icon: AnimatedIcons.play_pause,
                                 progress: _animationController),
-                            onPressed: () => _playAndPauseSwitch(),
+                            onPressed: () =>
+                                _playAndPauseSwitch(pauseButton: true),
                           ),
                         ),
                       ),
