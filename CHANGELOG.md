@@ -1,4 +1,4 @@
-## 1.0.2 - SimplePlayer Organizing SimplePlayer
+## 1.0.3 - SimplePlayer Organizing SimplePlayer
 
 * Functional package accepts videos via network and via assets path.
 * Edit Readme*
