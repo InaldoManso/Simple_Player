@@ -20,6 +20,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -33,13 +34,15 @@ class _MyHomePageState extends State<MyHomePage> {
               color: Colors.blue,
               height: 200,
             ),
-            SimplePlayer.network(
-              simplePlayerSettings: SimplePlayerSettings(
-                simplePathType: SimplePathType.network(url: url),
-                aspectRatio: 16 / 9,
-                autoPlay: false,
-                loopMode: false,
-                label: 'Bee',
+            SizedBox(
+              width: width * 1,
+              child: SimplePlayer.network(
+                simplePlayerSettings: SimplePlayerSettings(
+                  simplePathType: SimplePathType.network(url: url),
+                  autoPlay: false,
+                  loopMode: false,
+                  label: 'Bee',
+                ),
               ),
             ),
             Container(

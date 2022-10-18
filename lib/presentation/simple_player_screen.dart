@@ -1,18 +1,14 @@
-import 'package:flutter/services.dart';
-import 'package:screen_brightness/screen_brightness.dart';
 import 'package:simple_player/core/date_formatter.dart';
 import 'package:simple_player/presentation/simple_player_fullscreen.dart';
 import 'package:simple_player/aplication/simple_aplication.dart';
 import 'package:simple_player/model/simple_player_settings.dart';
 import 'package:simple_player/model/simple_player_state.dart';
+import 'package:simple_player/presentation/widgets/brightness_slider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:simple_player/simple_player.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:math';
-
-import 'package:volume_controller/volume_controller.dart';
 
 class SimplePlayerScrren extends StatefulWidget {
   final SimplePlayerSettings simplePlayerSettings;
@@ -34,12 +30,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
       SnappingSheetController();
   late VideoPlayerController _videoPlayerController;
   late AnimationController _animationController;
-  VolumeController _volumeController = VolumeController();
   double? _currentSeconds = 0.0;
   double? _totalSeconds = 0.0;
-  double? _lastVolume = 0.0;
-  double? _volume = 0.0;
-  double? _brightness = 0.0;
   double? _speed = 1.0;
   String? _showTime = '-:-';
   String? _tittle = '';
@@ -47,39 +39,9 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   bool? _visibleControls = true;
   bool? _autoPlay = true;
   bool? _loopMode = true;
-  bool? _isMuted = false;
   bool? _wasPlaying = false;
   bool? _confortMode = false;
-
-  //Default
-  final SnappingPosition _initPosition = const SnappingPosition.factor(
-      positionFactor: 1.0, grabbingContentOffset: GrabbingContentOffset.bottom);
-
-  _initializeSliders() async {
-    _volumeController.getVolume().then((value) {
-      _volumeSetter(value);
-    });
-    ScreenBrightness().current.then((value) {
-      _brightnessSetter(value);
-    });
-  }
-
-  _brightnessSetter(double brightness) async {
-    setState(() => _brightness = brightness);
-    ScreenBrightness().setScreenBrightness(brightness);
-  }
-
-  _volumeSetter(double volume) async {
-    _videoPlayerController.setVolume(volume);
-    _volumeController.setVolume(volume, showSystemUI: false);
-    setState(() => _volume = volume);
-
-    if (volume > 0.0 && _isMuted!) {
-      setState(() => _isMuted = false);
-    } else if (volume == 0.0) {
-      setState(() => _isMuted = true);
-    }
-  }
+  Color? _colorAccent = Colors.red;
 
   _showAndHideControls(bool show) {
     setState(() {
@@ -97,17 +59,6 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
       setState(() => _confortMode = false);
     } else {
       setState(() => _confortMode = true);
-    }
-  }
-
-  _muteToggle() {
-    if (_isMuted!) {
-      _volumeSetter(_lastVolume!);
-      setState(() => _isMuted = false);
-    } else {
-      _lastVolume = _volume;
-      _volumeSetter(0.0);
-      setState(() => _isMuted = true);
     }
   }
 
@@ -147,13 +98,25 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   _fullScreenManager() {
-    final sps = SimplePlayerState(currentSenconds: _currentSeconds);
+    SimplePlayerState simplePlayerState = SimplePlayerState(
+        currentSeconds: _currentSeconds,
+        totalSeconds: _totalSeconds,
+        speed: _speed,
+        showTime: _showTime,
+        label: _tittle,
+        autoPlay: _autoPlay,
+        loopMode: _loopMode,
+        wasPlaying: _wasPlaying,
+        confortMode: _confortMode);
+
+    if (_videoPlayerController.value.isPlaying) _playAndPauseSwitch();
+
     Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => SimplePlayerFullScreen(
               simplePlayerSettings: simplePlayerSettings,
-              simplePlayerState: sps),
+              simplePlayerState: simplePlayerState),
         )).then((value) {});
   }
 
@@ -178,7 +141,6 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   _sheetTap() {
-    print('tap');
     if (_visibleSheetControls!) {
       _snappingSheetController.snapToPosition(const SnappingPosition.factor(
           positionFactor: 1.0,
@@ -196,18 +158,18 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   _setupControllers(SimplePlayerSettings simplePlayerSettings) {
     //Video controller
     _videoPlayerController = simpleAplication.getControler(simplePlayerSettings)
-      ..initialize().then((_) {
-        setState(() {
-          _totalSeconds =
-              _videoPlayerController.value.duration.inMilliseconds.toDouble();
-          _videoPlayerController.setLooping(_loopMode!);
-          _videoPlayerController.setVolume(0.0);
-        });
+      ..initialize().then(
+        (_) {
+          setState(() {
+            _totalSeconds =
+                _videoPlayerController.value.duration.inMilliseconds.toDouble();
+            _videoPlayerController.setLooping(_loopMode!);
+          });
 
-        //Methods after settings
-        _autoPlayChecker(_autoPlay);
-        _initializeSliders();
-      });
+          //Methods after settings
+          _autoPlayChecker(_autoPlay);
+        },
+      );
 
     //Icons controller
     _animationController = AnimationController(
@@ -226,9 +188,6 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           _animationController.reverse();
           _jumpTo(0.0);
         }
-        double minutes =
-            _videoPlayerController.value.position.inMinutes.toDouble();
-        int seconds = _videoPlayerController.value.position.inSeconds;
         setState(() {
           _currentSeconds =
               _videoPlayerController.value.position.inMilliseconds.toDouble();
@@ -245,6 +204,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
       _tittle = simplePlayerSettings.label;
       _autoPlay = simplePlayerSettings.autoPlay!;
       _loopMode = simplePlayerSettings.loopMode!;
+      _colorAccent = simplePlayerSettings.colorAccent;
     });
 
     //Methods
@@ -262,12 +222,14 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    return Center(
+    return Container(
+      width: width,
+      color: Colors.black,
       child: AspectRatio(
         aspectRatio: simplePlayerSettings.aspectRatio!,
         child: SnappingSheet.horizontal(
           controller: _snappingSheetController,
-          initialSnappingPosition: _initPosition,
+          initialSnappingPosition: simpleAplication.initSnappingPosition(),
           snappingPositions: const [
             SnappingPosition.factor(
                 //left position:
@@ -293,6 +255,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
             _sheetMove(sheetPosition.relativeToSnappingPositions);
           },
           sheetLeft: SnappingSheetContent(
+            sizeBehavior: const SheetSizeFill(),
             draggable: true,
             child: GestureDetector(
               child: Container(
@@ -317,7 +280,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
             ),
           ),
           sheetRight: SnappingSheetContent(
-            sizeBehavior: const SheetSizeFill(),
+            // sizeBehavior: const SheetSizeFill(),
             draggable: false,
             child: Container(
               padding: const EdgeInsets.all(8),
@@ -335,8 +298,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Expanded(child: _volumeWidget()),
-                    Expanded(child: _brightnessWidget()),
+                    Expanded(
+                        child: BrightnessSlider(colorAccent: _colorAccent)),
                     Expanded(child: _playbackSpeedWidget()),
                     const Divider(
                       color: Colors.white,
@@ -362,7 +325,9 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                     ? Container(
                         key: const ValueKey('a'),
                         height: width,
-                        color: Colors.black.withOpacity(0.2),
+                        color: _confortMode!
+                            ? Colors.deepOrange.withOpacity(0.1)
+                            : Colors.black.withOpacity(0.2),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -411,7 +376,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                                 ),
                                 Expanded(
                                     child: SliderTheme(
-                                  data: _sliderTheme(),
+                                  data: simpleAplication.getSliderThemeData(
+                                      colorAccent: _colorAccent),
                                   child: Slider.adaptive(
                                     value: _currentSeconds!,
                                     max: _totalSeconds!,
@@ -452,58 +418,6 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     );
   }
 
-  Widget _volumeWidget() {
-    return Row(
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 16),
-          child: Icon(Icons.volume_up_rounded, color: Colors.white),
-        ),
-        Expanded(
-          child: SliderTheme(
-            data: _sliderTheme(),
-            child: Slider(
-              value: _volume!,
-              max: 1.0,
-              min: 0.0,
-              divisions: 20,
-              label: simpleAplication.doubleConvert(_volume!),
-              onChanged: (double value) {
-                _volumeSetter(value);
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _brightnessWidget() {
-    return Row(
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 16),
-          child: Icon(Icons.settings_brightness_rounded, color: Colors.white),
-        ),
-        Expanded(
-          child: SliderTheme(
-            data: _sliderTheme(),
-            child: Slider(
-              value: _brightness!,
-              max: 1.0,
-              min: 0.0,
-              divisions: 20,
-              label: simpleAplication.doubleConvert(_brightness!),
-              onChanged: (double value) {
-                _brightnessSetter(value);
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _playbackSpeedWidget() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -516,25 +430,25 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
             child: TextButton(
                 child: Text('0.5x',
                     style: TextStyle(
-                        color: _speed == 0.5 ? Colors.red : Colors.white)),
+                        color: _speed == 0.5 ? _colorAccent : Colors.white)),
                 onPressed: () => _speedSetter(0.5))),
         Expanded(
             child: TextButton(
                 child: Text('1.0x',
                     style: TextStyle(
-                        color: _speed == 1.0 ? Colors.red : Colors.white)),
+                        color: _speed == 1.0 ? _colorAccent : Colors.white)),
                 onPressed: () => _speedSetter(1.0))),
         Expanded(
             child: TextButton(
                 child: Text('1.5x',
                     style: TextStyle(
-                        color: _speed == 1.5 ? Colors.red : Colors.white)),
+                        color: _speed == 1.5 ? _colorAccent : Colors.white)),
                 onPressed: () => _speedSetter(1.5))),
         Expanded(
             child: TextButton(
                 child: Text('2.0x',
                     style: TextStyle(
-                        color: _speed == 2.0 ? Colors.red : Colors.white)),
+                        color: _speed == 2.0 ? _colorAccent : Colors.white)),
                 onPressed: () => _speedSetter(2.0))),
       ],
     );
@@ -559,34 +473,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
             },
           ),
         ),
-        Material(
-          color: Colors.transparent,
-          child: IconButton(
-            splashRadius: 20,
-            padding: EdgeInsets.zero,
-            visualDensity: VisualDensity.compact,
-            splashColor: Colors.redAccent,
-            icon: Icon(_isMuted! ? Icons.volume_mute : Icons.volume_up,
-                color: _isMuted! ? Colors.red : Colors.white),
-            onPressed: () {
-              _muteToggle();
-            },
-          ),
-        ),
       ],
-    );
-  }
-
-  SliderThemeData _sliderTheme() {
-    return SliderThemeData(
-      activeTrackColor: Colors.red[600]!,
-      thumbColor: Colors.white,
-      inactiveTrackColor: Colors.grey,
-      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
-      overlayColor: Colors.red.withOpacity(0.5),
-      overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
-      activeTickMarkColor: Colors.white,
-      inactiveTickMarkColor: Colors.white,
     );
   }
 
