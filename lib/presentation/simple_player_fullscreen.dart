@@ -1,5 +1,4 @@
-import 'package:flutter/cupertino.dart';
-import 'package:simple_player/presentation/widgets/brightness_slider.dart';
+import 'widgets/brightness_slider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:video_player/video_player.dart';
 import '../aplication/simple_aplication.dart';
@@ -41,33 +40,9 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   String? _tittle = '';
   bool? _visibleSheetControls = false;
   bool? _visibleControls = true;
-  bool? _autoPlay = true;
-  bool? _loopMode = true;
   bool? _wasPlaying = false;
   bool? _confortMode = false;
   Color? _colorAccent = Colors.red;
-
-  _secondsListener() {
-    _videoPlayerController.addListener(
-      () {
-        bool playing = _videoPlayerController.value.isPlaying;
-        if (_currentSeconds == _totalSeconds && !playing) {
-          _showAndHideControls(true);
-          _animationController.reverse();
-          _jumpTo(0.0);
-        }
-        double minutes =
-            _videoPlayerController.value.position.inMinutes.toDouble();
-        int seconds = _videoPlayerController.value.position.inSeconds;
-        setState(() {
-          _currentSeconds =
-              _videoPlayerController.value.position.inMilliseconds.toDouble();
-          _showTime = DateFormatter()
-              .currentTime(_videoPlayerController.value.position);
-        });
-      },
-    );
-  }
 
   _showAndHideControls(bool show) {
     setState(() {
@@ -115,20 +90,27 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     }
   }
 
-  _autoPlayChecker(bool? autoPlay) {
-    if (autoPlay!) {
-      _animationController.forward();
-      _videoPlayerController.play();
-      _wasPlaying = true;
-    }
-  }
-
   _fullScreenManager() {
-    Navigator.pop(context);
+    SimplePlayerState simplePlayerState = SimplePlayerState(
+        currentSeconds: _currentSeconds,
+        totalSeconds: _totalSeconds,
+        speed: _speed,
+        showTime: _showTime,
+        label: _tittle,
+        autoPlay: simplePlayerSettings.autoPlay,
+        loopMode: simplePlayerSettings.loopMode,
+        wasPlaying: _videoPlayerController.value.isPlaying,
+        confortMode: _confortMode);
+
+    Navigator.pop(context, simplePlayerState);
   }
 
   _jumpTo(double value) {
     _videoPlayerController.seekTo(Duration(milliseconds: value.toInt()));
+
+    if (_wasPlaying!) {
+      _playAndPauseSwitch();
+    }
   }
 
   _playAndPauseSwitch() {
@@ -162,19 +144,37 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     }
   }
 
-  _setupControllers(
-      SimplePlayerSettings simplePlayerSettings, double currentSeconds) {
+  _secondsListener() {
+    _videoPlayerController.addListener(
+      () {
+        bool playing = _videoPlayerController.value.isPlaying;
+        if (_currentSeconds == _totalSeconds && !playing) {
+          _showAndHideControls(true);
+          _animationController.reverse();
+          _jumpTo(0.0);
+        }
+        setState(() {
+          _currentSeconds =
+              _videoPlayerController.value.position.inMilliseconds.toDouble();
+          _showTime = DateFormatter()
+              .currentTime(_videoPlayerController.value.position);
+        });
+      },
+    );
+  }
+
+  _setupControllers(SimplePlayerSettings simplePlayerSettings) {
     //Video controller
     _videoPlayerController = simpleAplication.getControler(simplePlayerSettings)
       ..initialize().then(
         (_) {
           setState(() {
-            _videoPlayerController.setLooping(_loopMode!);
+            _totalSeconds =
+                _videoPlayerController.value.duration.inMilliseconds.toDouble();
           });
 
           //Methods after settings
-          _autoPlayChecker(_autoPlay);
-          _jumpTo(currentSeconds);
+          _lastState();
         },
       );
 
@@ -186,23 +186,30 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     );
   }
 
-  _initializeInterface() {
+  _lastState() {
     SimplePlayerState simplePlayerState = widget.simplePlayerState;
+
+    setState(() {
+      _speed = simplePlayerState.speed;
+      _tittle = simplePlayerState.label;
+      _wasPlaying = simplePlayerState.wasPlaying;
+      _confortMode = simplePlayerState.confortMode;
+    });
+
+    _videoPlayerController.setLooping(simplePlayerState.loopMode!);
+    _jumpTo(simplePlayerState.currentSeconds!);
+    _speedSetter(simplePlayerState.speed);
+  }
+
+  _initializeInterface() {
     simplePlayerSettings = widget.simplePlayerSettings;
 
     setState(() {
-      _tittle = simplePlayerSettings.label;
-      _autoPlay = simplePlayerSettings.autoPlay!;
-      _loopMode = simplePlayerSettings.loopMode!;
-      _colorAccent = simplePlayerSettings.colorAccent;
-
-      //LastState
-      _totalSeconds = simplePlayerState.totalSeconds;
-      _currentSeconds = simplePlayerState.currentSeconds;
+      _colorAccent = _colorAccent = simplePlayerSettings.colorAccent;
     });
 
     //Methods
-    _setupControllers(simplePlayerSettings, _currentSeconds!);
+    _setupControllers(simplePlayerSettings);
     _secondsListener();
   }
 
@@ -218,6 +225,10 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   void dispose() {
     _lockAndUnlockScreen(false);
     _hideNavigation(false);
+    _animationController.stop();
+    _animationController.dispose();
+    _videoPlayerController.removeListener(() {});
+    _videoPlayerController.dispose();
     super.dispose();
   }
 
@@ -420,7 +431,6 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
                                   ? Colors.deepOrange.withOpacity(0.1)
                                   : Colors.transparent,
                               height: height,
-                              width: width,
                             ),
                     )
                   ],

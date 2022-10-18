@@ -1,13 +1,13 @@
-import 'package:simple_player/core/date_formatter.dart';
-import 'package:simple_player/presentation/simple_player_fullscreen.dart';
-import 'package:simple_player/aplication/simple_aplication.dart';
-import 'package:simple_player/model/simple_player_settings.dart';
-import 'package:simple_player/model/simple_player_state.dart';
-import 'package:simple_player/presentation/widgets/brightness_slider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:simple_player/simple_player.dart';
 import 'package:video_player/video_player.dart';
+import '../aplication/simple_aplication.dart';
+import '../model/simple_player_settings.dart';
+import '../model/simple_player_state.dart';
+import 'widgets/brightness_slider.dart';
+import 'simple_player_fullscreen.dart';
 import 'package:flutter/material.dart';
+import '../core/date_formatter.dart';
 import 'dart:async';
 
 class SimplePlayerScrren extends StatefulWidget {
@@ -37,8 +37,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   String? _tittle = '';
   bool? _visibleSheetControls = false;
   bool? _visibleControls = true;
-  bool? _autoPlay = true;
-  bool? _loopMode = true;
+  bool? _autoPlay = false;
+  bool? _loopMode = false;
   bool? _wasPlaying = false;
   bool? _confortMode = false;
   Color? _colorAccent = Colors.red;
@@ -106,7 +106,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
         label: _tittle,
         autoPlay: _autoPlay,
         loopMode: _loopMode,
-        wasPlaying: _wasPlaying,
+        wasPlaying: _videoPlayerController.value.isPlaying,
         confortMode: _confortMode);
 
     if (_videoPlayerController.value.isPlaying) _playAndPauseSwitch();
@@ -117,7 +117,27 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           builder: (context) => SimplePlayerFullScreen(
               simplePlayerSettings: simplePlayerSettings,
               simplePlayerState: simplePlayerState),
-        )).then((value) {});
+        )).then((value) {
+      _lastState(value);
+    });
+  }
+
+  _lastState(SimplePlayerState simplePlayerState) {
+    bool playing = false;
+    setState(() {
+      _speed = simplePlayerState.speed;
+      _tittle = simplePlayerState.label;
+      _wasPlaying = simplePlayerState.wasPlaying;
+      _confortMode = simplePlayerState.confortMode;
+      playing = simplePlayerState.wasPlaying!;
+    });
+
+    _jumpTo(simplePlayerState.currentSeconds!);
+    _speedSetter(simplePlayerState.speed);
+
+    if (playing) {
+      _playAndPauseSwitch();
+    }
   }
 
   _jumpTo(double value) {
@@ -401,14 +421,18 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                           ],
                         ),
                       )
-                    : AnimatedContainer(
-                        duration: const Duration(seconds: 1),
-                        key: const ValueKey('b'),
-                        color: _confortMode!
-                            ? Colors.deepOrange.withOpacity(0.1)
-                            : Colors.transparent,
-                        height: height,
-                        width: width,
+                    : GestureDetector(
+                        child: AnimatedContainer(
+                          duration: const Duration(seconds: 1),
+                          key: const ValueKey('b'),
+                          color: _confortMode!
+                              ? Colors.deepOrange.withOpacity(0.1)
+                              : Colors.transparent,
+                          height: height,
+                        ),
+                        onTap: () {
+                          _sheetTap();
+                        },
                       ),
               )
             ],

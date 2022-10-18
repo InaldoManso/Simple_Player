@@ -36,7 +36,19 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(
               width: width * 1,
-              child: SimplePlayer.network(
+              child: SimplePlayer.build(
+                simplePlayerSettings: SimplePlayerSettings(
+                    simplePathType: SimplePathType.network(url: url),
+                    label: 'Bee',
+                    aspectRatio: 16 / 9,
+                    autoPlay: false,
+                    loopMode: false,
+                    colorAccent: Colors.red),
+              ),
+            ),
+            SizedBox(
+              width: width * 1,
+              child: SimplePlayer.build(
                 simplePlayerSettings: SimplePlayerSettings(
                   simplePathType: SimplePathType.network(url: url),
                   autoPlay: false,
