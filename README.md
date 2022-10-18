@@ -27,7 +27,8 @@ SimplePlayer.build(
     ),
 )
 ```
-</div> </br> <div>
+</div>
+<div>
 
 ### Result:
 <img align="center" alt="Simple Player" src="https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/bee.png">
@@ -36,6 +37,6 @@ SimplePlayer.build(
 
 ## Good coding! 😎💙
 #### Follow me on: https://github.com/InaldoManso
-#### Developed by: Inaldo Manso
+###### Developed by: Inaldo Manso
 
 </br></div>
