@@ -3,10 +3,13 @@ import 'package:simple_player/simple_player.dart';
 import 'package:video_player/video_player.dart';
 import '../aplication/simple_aplication.dart';
 import '../model/simple_player_settings.dart';
+import 'widgets/playback_speed_options.dart';
 import '../model/simple_player_state.dart';
+import 'widgets/confort_mode_button.dart';
 import 'widgets/brightness_slider.dart';
 import 'simple_player_fullscreen.dart';
 import 'package:flutter/material.dart';
+import '../constants/constants.dart';
 import '../core/date_formatter.dart';
 import 'dart:async';
 
@@ -22,8 +25,9 @@ class SimplePlayerScrren extends StatefulWidget {
 class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     with SingleTickerProviderStateMixin {
   //Classes and Packages
-  late SimplePlayerSettings simplePlayerSettings;
   SimpleAplication simpleAplication = SimpleAplication();
+  late SimplePlayerSettings simplePlayerSettings;
+  Constants constants = Constants();
 
   //Attributes
   final SnappingSheetController _snappingSheetController =
@@ -43,6 +47,14 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   bool? _confortMode = false;
   Color? _colorAccent = Colors.red;
 
+  double _aspectRatioManager(VideoPlayerController controller) {
+    if (simplePlayerSettings.forceAspectRatio!) {
+      return simplePlayerSettings.aspectRatio!;
+    } else {
+      return controller.value.aspectRatio;
+    }
+  }
+
   _showAndHideControls(bool show) {
     setState(() {
       _visibleControls = show;
@@ -52,14 +64,6 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   _speedSetter(double? speed) async {
     setState(() => _speed = speed);
     _videoPlayerController.setPlaybackSpeed(speed!);
-  }
-
-  _confortToggle() {
-    if (_confortMode!) {
-      setState(() => _confortMode = false);
-    } else {
-      setState(() => _confortMode = true);
-    }
   }
 
   _visibleControlManager(double position) {
@@ -112,18 +116,26 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
 
     if (_videoPlayerController.value.isPlaying) _playAndPauseSwitch();
 
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SimplePlayerFullScreen(
-              simplePlayerSettings: simplePlayerSettings,
-              simplePlayerState: simplePlayerState),
-        )).then((value) {
-      _lastState(value);
+    //LockRotation
+    simpleAplication.lockAndUnlockScreen(true);
+    //FullScreenActivate
+    simpleAplication.hideNavigation(true).then((value) {
+      Timer(const Duration(milliseconds: 50), () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SimplePlayerFullScreen(
+                  simplePlayerSettings: simplePlayerSettings,
+                  simplePlayerState: simplePlayerState),
+            )).then((value) {
+          _lastState(value);
+        });
+      });
     });
   }
 
   _lastState(SimplePlayerState simplePlayerState) {
+    //Retrieves and inserts the last state of the previous screen
     bool playing = false;
     setState(() {
       _speed = simplePlayerState.speed;
@@ -224,12 +236,12 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   _initializeInterface() {
-    simplePlayerSettings = widget.simplePlayerSettings;
     setState(() {
-      _tittle = simplePlayerSettings.label;
-      _autoPlay = simplePlayerSettings.autoPlay!;
-      _loopMode = simplePlayerSettings.loopMode!;
-      _colorAccent = simplePlayerSettings.colorAccent;
+      simplePlayerSettings = widget.simplePlayerSettings;
+      _tittle = widget.simplePlayerSettings.label;
+      _autoPlay = widget.simplePlayerSettings.autoPlay!;
+      _loopMode = widget.simplePlayerSettings.loopMode!;
+      _colorAccent = widget.simplePlayerSettings.colorAccent;
     });
 
     //Methods
@@ -254,7 +266,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
         aspectRatio: simplePlayerSettings.aspectRatio!,
         child: SnappingSheet.horizontal(
           controller: _snappingSheetController,
-          initialSnappingPosition: simpleAplication.initSnappingPosition(),
+          initialSnappingPosition: constants.initSnappingPosition(),
           snappingPositions: const [
             SnappingPosition.factor(
                 //left position:
@@ -280,7 +292,6 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
             _sheetMove(sheetPosition.relativeToSnappingPositions);
           },
           sheetLeft: SnappingSheetContent(
-            sizeBehavior: const SheetSizeFill(),
             draggable: true,
             child: GestureDetector(
               child: Container(
@@ -305,7 +316,6 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
             ),
           ),
           sheetRight: SnappingSheetContent(
-            // sizeBehavior: const SheetSizeFill(),
             draggable: false,
             child: Container(
               padding: const EdgeInsets.all(8),
@@ -325,14 +335,31 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                   children: [
                     Expanded(
                         child: BrightnessSlider(colorAccent: _colorAccent)),
-                    Expanded(child: _playbackSpeedWidget()),
-                    const Divider(
-                      color: Colors.white,
-                      indent: 8,
-                      endIndent: 8,
-                      height: 4,
+                    Expanded(
+                      child: PlaybackSpeedOptions(
+                        speed: _speed!,
+                        colorAccent: _colorAccent!,
+                        speedSelected: (value) => _speedSetter(value),
+                      ),
                     ),
-                    Expanded(child: _moreButtonsWidget())
+                    const Divider(
+                        color: Colors.white,
+                        indent: 8,
+                        endIndent: 8,
+                        height: 4),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ConfortModeButton(
+                            confortModeOn: _confortMode!,
+                            confortClicked: (value) {
+                              setState(() => _confortMode = value);
+                            },
+                          )
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -340,7 +367,12 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           ),
           child: Stack(
             children: [
-              VideoPlayer(_videoPlayerController),
+              Center(
+                child: AspectRatio(
+                  aspectRatio: _aspectRatioManager(_videoPlayerController),
+                  child: VideoPlayer(_videoPlayerController),
+                ),
+              ),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
                 transitionBuilder: (Widget child, Animation<double> animation) {
@@ -401,7 +433,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                                 ),
                                 Expanded(
                                     child: SliderTheme(
-                                  data: simpleAplication.getSliderThemeData(
+                                  data: constants.getSliderThemeData(
                                       colorAccent: _colorAccent),
                                   child: Slider.adaptive(
                                     value: _currentSeconds!,
@@ -444,65 +476,6 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           ),
         ),
       ),
-    );
-  }
-
-  Widget _playbackSpeedWidget() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 16),
-          child: Icon(Icons.slow_motion_video_rounded, color: Colors.white),
-        ),
-        Expanded(
-            child: TextButton(
-                child: Text('0.5x',
-                    style: TextStyle(
-                        color: _speed == 0.5 ? _colorAccent : Colors.white)),
-                onPressed: () => _speedSetter(0.5))),
-        Expanded(
-            child: TextButton(
-                child: Text('1.0x',
-                    style: TextStyle(
-                        color: _speed == 1.0 ? _colorAccent : Colors.white)),
-                onPressed: () => _speedSetter(1.0))),
-        Expanded(
-            child: TextButton(
-                child: Text('1.5x',
-                    style: TextStyle(
-                        color: _speed == 1.5 ? _colorAccent : Colors.white)),
-                onPressed: () => _speedSetter(1.5))),
-        Expanded(
-            child: TextButton(
-                child: Text('2.0x',
-                    style: TextStyle(
-                        color: _speed == 2.0 ? _colorAccent : Colors.white)),
-                onPressed: () => _speedSetter(2.0))),
-      ],
-    );
-  }
-
-  Widget _moreButtonsWidget() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Material(
-          color: Colors.transparent,
-          child: IconButton(
-            tooltip: 'Modo confortável: suaviza as cores.',
-            splashRadius: 20,
-            padding: EdgeInsets.zero,
-            visualDensity: VisualDensity.compact,
-            splashColor: Colors.orangeAccent,
-            icon: Icon(Icons.nights_stay,
-                color: _confortMode! ? Colors.orange : Colors.white),
-            onPressed: () {
-              _confortToggle();
-            },
-          ),
-        ),
-      ],
     );
   }
 

@@ -34,16 +34,15 @@ class _MyHomePageState extends State<MyHomePage> {
               color: Colors.blue,
               height: 200,
             ),
-            SizedBox(
-              width: width * 1,
-              child: SimplePlayer.build(
-                simplePlayerSettings: SimplePlayerSettings(
-                    simplePathType: SimplePathType.network(url: url),
-                    label: 'Bee',
-                    aspectRatio: 16 / 9,
-                    autoPlay: false,
-                    loopMode: false,
-                    colorAccent: Colors.amber[600]),
+            SimplePlayer.build(
+              simplePlayerSettings: SimplePlayerSettings.network(
+                path: url,
+                label: 'Bee',
+                aspectRatio: 16 / 9,
+                autoPlay: false,
+                loopMode: false,
+                forceAspectRatio: false,
+                colorAccent: Colors.red,
               ),
             ),
             Container(

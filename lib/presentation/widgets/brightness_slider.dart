@@ -1,6 +1,7 @@
 import 'package:screen_brightness/screen_brightness.dart';
 import '../../aplication/simple_aplication.dart';
 import 'package:flutter/material.dart';
+import '../../constants/constants.dart';
 
 class BrightnessSlider extends StatefulWidget {
   Color? colorAccent = Colors.red;
@@ -13,6 +14,7 @@ class BrightnessSlider extends StatefulWidget {
 class BbrightnessStateSlider extends State<BrightnessSlider> {
   //Classes and Packages
   SimpleAplication simpleAplication = SimpleAplication();
+  Constants constants = Constants();
 
   //Attributes
   Color _colorAccent = Colors.red;
@@ -50,8 +52,7 @@ class BbrightnessStateSlider extends State<BrightnessSlider> {
         ),
         Expanded(
           child: SliderTheme(
-            data:
-                simpleAplication.getSliderThemeData(colorAccent: _colorAccent),
+            data: constants.getSliderThemeData(colorAccent: _colorAccent),
             child: Slider(
               value: _brightness!,
               max: 1.0,

@@ -1,7 +1,6 @@
-import 'package:snapping_sheet/snapping_sheet.dart';
+import 'package:flutter/services.dart';
 import 'package:simple_player/simple_player.dart';
 import 'package:video_player/video_player.dart';
-import 'package:flutter/material.dart';
 
 class SimpleAplication {
   String example =
@@ -9,38 +8,14 @@ class SimpleAplication {
 
   VideoPlayerController getControler(
       SimplePlayerSettings simplePlayerSettings) {
-    switch (simplePlayerSettings.simplePathType.type) {
+    switch (simplePlayerSettings.type) {
       case 'network':
-        return VideoPlayerController.network(
-            simplePlayerSettings.simplePathType.path!);
-
+        return VideoPlayerController.network(simplePlayerSettings.path!);
       case 'assets':
-        return VideoPlayerController.asset(
-            simplePlayerSettings.simplePathType.path!);
-
+        return VideoPlayerController.asset(simplePlayerSettings.path!);
       default:
         return VideoPlayerController.network(example);
     }
-  }
-
-  SliderThemeData getSliderThemeData({Color? colorAccent}) {
-    Color accentColor = colorAccent ?? Colors.red;
-    return SliderThemeData(
-      activeTrackColor: accentColor,
-      thumbColor: Colors.white,
-      inactiveTrackColor: Colors.grey,
-      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
-      overlayColor: accentColor.withOpacity(0.5),
-      overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
-      activeTickMarkColor: Colors.white,
-      inactiveTickMarkColor: Colors.white,
-    );
-  }
-
-  SnappingPosition initSnappingPosition({Color? colorAccent}) {
-    return const SnappingPosition.factor(
-        positionFactor: 1.0,
-        grabbingContentOffset: GrabbingContentOffset.bottom);
   }
 
   String doubleConvert(double volume) {
@@ -57,5 +32,33 @@ class SimpleAplication {
   String speedConvert(double volume) {
     String value = volume.toStringAsPrecision(2);
     return '$value x';
+  }
+
+  Future<bool> hideNavigation(bool hide) async {
+    if (hide) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky)
+          .whenComplete(() {});
+      return true;
+    } else {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+          overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]);
+      return false;
+    }
+  }
+
+  lockAndUnlockScreen(bool lock) {
+    if (lock) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    } else {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeRight,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    }
   }
 }

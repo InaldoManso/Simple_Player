@@ -6,7 +6,6 @@ import 'package:simple_player/model/simple_player_settings.dart';
 import 'package:flutter/material.dart';
 //Resources
 export 'model/simple_player_settings.dart';
-export 'model/simple_path_type.dart';
 
 class SimplePlayer {
   SimplePlayer();
@@ -47,8 +46,6 @@ class SimplePlayer {
   ///
   ///Good coding! 😎💙
   ///
-  ///Follow me on:
-  ///https://github.com/InaldoManso
 
   static Widget build({SimplePlayerSettings? simplePlayerSettings}) {
     return SimplePlayerScrren(simplePlayerSettings: simplePlayerSettings!);
