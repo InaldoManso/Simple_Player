@@ -1,13 +1,9 @@
-import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:video_player/video_player.dart';
 import '../aplication/simple_aplication.dart';
 import '../model/simple_player_settings.dart';
-import 'widgets/playback_speed_options.dart';
 import '../model/simple_player_state.dart';
-import 'widgets/confort_mode_button.dart';
-import 'widgets/brightness_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'widgets/settings_screen.dart';
 import '../core/date_formatter.dart';
 import '../constants/constants.dart';
 import 'dart:async';
@@ -33,8 +29,6 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   Constants constants = Constants();
 
   //Attributes
-  final SnappingSheetController _snappingSheetController =
-      SnappingSheetController();
   late VideoPlayerController _videoPlayerController;
   late AnimationController _animationController;
   double? _currentSeconds = 0.0;
@@ -43,10 +37,32 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   String? _showTime = '-:-';
   String? _tittle = '';
   bool? _visibleSheetControls = false;
+  bool? _visibleSettings = false;
   bool? _visibleControls = true;
   bool? _wasPlaying = false;
   bool? _confortMode = false;
   Color? _colorAccent = Colors.red;
+
+  _showScreenSettings() {
+    bool playing = _videoPlayerController.value.isPlaying;
+    if (_visibleSettings! && !playing) {
+      //play
+      if (_wasPlaying!) {
+        _playAndPauseSwitch();
+        setState(() => _visibleSettings = false);
+      } else {
+        setState(() => _visibleSettings = false);
+        _showAndHideControls(true);
+      }
+    } else if (!_visibleSettings! && playing) {
+      //pause
+      _playAndPauseSwitch();
+      setState(() => _visibleSettings = true);
+    } else if (!_visibleSettings!) {
+      setState(() => _visibleSettings = true);
+      _showAndHideControls(false);
+    }
+  }
 
   double _aspectRatioManager(VideoPlayerController controller) {
     if (simplePlayerSettings.forceAspectRatio!) {
@@ -142,14 +158,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     }
   }
 
-  _sheetTap() {
-    if (_visibleSheetControls!) {
-      _snappingSheetController.snapToPosition(const SnappingPosition.factor(
-          positionFactor: 1.0,
-          snappingCurve: Curves.easeOutExpo,
-          snappingDuration: Duration(milliseconds: 500),
-          grabbingContentOffset: GrabbingContentOffset.bottom));
-    }
+  _screenTap() {
     if (_visibleControls!) {
       _showAndHideControls(false);
     } else {
@@ -250,112 +259,13 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    return RotatedBox(
-      quarterTurns: 1,
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SnappingSheet.horizontal(
-          controller: _snappingSheetController,
-          initialSnappingPosition: constants.initSnappingPosition(),
-          snappingPositions: const [
-            SnappingPosition.factor(
-                //left position:
-                positionFactor: 0.2,
-                snappingCurve: Curves.easeOutCirc,
-                snappingDuration: Duration(milliseconds: 700),
-                grabbingContentOffset: GrabbingContentOffset.top),
-            SnappingPosition.factor(
-                //right position:
-                positionFactor: 1.0,
-                snappingCurve: Curves.easeOutExpo,
-                snappingDuration: Duration(milliseconds: 300),
-                grabbingContentOffset: GrabbingContentOffset.bottom),
-          ],
-          onSheetMoved: (sheetPositionData) {
-            double position = sheetPositionData.relativeToSnappingPositions;
-            _visibleControlManager(position);
-            if (_visibleControls! && position < 0.8) {
-              _showAndHideControls(false);
-            }
-          },
-          onSnapCompleted: (sheetPosition, snappingPosition) {
-            _sheetMove(sheetPosition.relativeToSnappingPositions);
-          },
-          sheetLeft: SnappingSheetContent(
-            sizeBehavior: const SheetSizeFill(),
-            draggable: true,
-            child: GestureDetector(
-              child: Container(
-                color: Colors.transparent,
-                padding: const EdgeInsets.only(top: 50),
-                margin: const EdgeInsets.only(bottom: 50),
-                child: Visibility(
-                  visible: _visibleControls!,
-                  child: Center(
-                    child: IconButton(
-                      icon: AnimatedIcon(
-                          size: 40,
-                          color: Colors.white,
-                          icon: AnimatedIcons.play_pause,
-                          progress: _animationController),
-                      onPressed: () => _playAndPauseSwitch(pauseButton: true),
-                    ),
-                  ),
-                ),
-              ),
-              onTap: () => _sheetTap(),
-            ),
-          ),
-          sheetRight: SnappingSheetContent(
-            draggable: false,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              decoration: const BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  bottomLeft: Radius.circular(24),
-                ),
-              ),
-              child: Visibility(
-                visible: _visibleSheetControls!,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Expanded(
-                        child: BrightnessSlider(colorAccent: _colorAccent)),
-                    Expanded(
-                      child: PlaybackSpeedOptions(
-                        speed: _speed!,
-                        colorAccent: _colorAccent!,
-                        speedSelected: (value) => _speedSetter(value),
-                      ),
-                    ),
-                    const Divider(
-                      color: Colors.white,
-                      indent: 8,
-                      endIndent: 8,
-                      height: 4,
-                    ),
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ConfortModeButton(
-                              confortModeOn: _confortMode!,
-                              confortClicked: (value) {
-                                setState(() => _confortMode = value);
-                              })
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ),
+    return Material(
+      color: Colors.black,
+      child: RotatedBox(
+        quarterTurns: 1,
+        child: Container(
+          width: width,
+          color: Colors.black,
           child: Stack(
             children: [
               Center(
@@ -364,100 +274,137 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
                   child: VideoPlayer(_videoPlayerController),
                 ),
               ),
+              Center(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+                  child: _visibleControls!
+                      ? GestureDetector(
+                          child: AnimatedContainer(
+                            duration: const Duration(seconds: 1),
+                            key: const ValueKey('a'),
+                            color: _confortMode!
+                                ? Colors.deepOrange.withOpacity(0.1)
+                                : Colors.black.withOpacity(0.2),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 16),
+                                      child: Text(
+                                        _tittle!,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          shadows: [
+                                            Shadow(
+                                              blurRadius: 10.0,
+                                              color: Colors.black,
+                                              offset: Offset(3.0, 2.0),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      padding: const EdgeInsets.all(0),
+                                      icon: const Icon(
+                                        Icons.settings_outlined,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        _showScreenSettings();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                Expanded(
+                                  child: Center(
+                                    child: IconButton(
+                                        icon: AnimatedIcon(
+                                            size: 40,
+                                            color: Colors.white,
+                                            icon: AnimatedIcons.play_pause,
+                                            progress: _animationController),
+                                        onPressed: () => _playAndPauseSwitch(
+                                            pauseButton: true)),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 16),
+                                        child: Text(_showTime!,
+                                            style: const TextStyle(
+                                                color: Colors.white))),
+                                    Expanded(
+                                        child: SliderTheme(
+                                      data: constants.getSliderThemeData(
+                                          colorAccent: _colorAccent),
+                                      child: Slider.adaptive(
+                                        value: _currentSeconds!,
+                                        max: _totalSeconds!,
+                                        min: 0,
+                                        label: _currentSeconds.toString(),
+                                        onChanged: (double value) {
+                                          _jumpTo(value);
+                                        },
+                                      ),
+                                    )),
+                                    IconButton(
+                                      padding: const EdgeInsets.all(0),
+                                      icon: const Icon(
+                                        Icons.fullscreen_exit,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () => _fullScreenManager(),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          onTap: () => _screenTap(),
+                        )
+                      : GestureDetector(
+                          child: AnimatedContainer(
+                            duration: const Duration(seconds: 1),
+                            key: const ValueKey('b'),
+                            color: _confortMode!
+                                ? Colors.deepOrange.withOpacity(0.1)
+                                : Colors.transparent,
+                            height: height,
+                          ),
+                          onTap: () => _screenTap(),
+                        ),
+                ),
+              ),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
                 transitionBuilder: (Widget child, Animation<double> animation) {
                   return FadeTransition(opacity: animation, child: child);
                 },
-                child: _visibleControls!
-                    ? Container(
-                        key: const ValueKey('a'),
-                        height: width,
-                        color: _confortMode!
-                            ? Colors.deepOrange.withOpacity(0.1)
-                            : Colors.black.withOpacity(0.2),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Text(
-                                _tittle!,
-                                textAlign: TextAlign.left,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      blurRadius: 10.0,
-                                      color: Colors.black,
-                                      offset: Offset(3.0, 2.0),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.only(right: 16),
-                                alignment: Alignment.centerRight,
-                                child: const Icon(
-                                  Icons.swipe_left_outlined,
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      blurRadius: 13.0,
-                                      color: Colors.black45,
-                                      offset: Offset(3.0, 2.0),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 16),
-                                  child: Text(_showTime!,
-                                      style:
-                                          const TextStyle(color: Colors.white)),
-                                ),
-                                Expanded(
-                                    child: SliderTheme(
-                                  data: constants.getSliderThemeData(
-                                      colorAccent: _colorAccent),
-                                  child: Slider.adaptive(
-                                    value: _currentSeconds!,
-                                    max: _totalSeconds!,
-                                    min: 0,
-                                    label: _currentSeconds.toString(),
-                                    onChanged: (double value) {
-                                      _jumpTo(value);
-                                    },
-                                  ),
-                                )),
-                                IconButton(
-                                  padding: const EdgeInsets.all(0),
-                                  icon: const Icon(
-                                    Icons.fullscreen_exit,
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: () => _fullScreenManager(),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                child: _visibleSettings!
+                    ? SettingsScreen(
+                        colorAccent: _colorAccent!,
+                        speed: _speed!,
+                        confortModeOn: _confortMode!,
+                        onExit: () => _showScreenSettings(),
+                        confortClicked: (value) =>
+                            setState(() => _confortMode = value),
+                        speedSelected: (value) => _speedSetter(value),
                       )
-                    : AnimatedContainer(
-                        duration: const Duration(seconds: 1),
-                        key: const ValueKey('b'),
-                        color: _confortMode!
-                            ? Colors.deepOrange.withOpacity(0.1)
-                            : Colors.transparent,
-                        height: height,
-                      ),
-              )
+                    : const SizedBox(width: 1, height: 1),
+              ),
             ],
           ),
         ),

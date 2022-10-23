@@ -1,4 +1,3 @@
-import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:flutter/material.dart';
 
 class Constants {
@@ -14,11 +13,5 @@ class Constants {
       activeTickMarkColor: Colors.white,
       inactiveTickMarkColor: Colors.white,
     );
-  }
-
-  SnappingPosition initSnappingPosition({Color? colorAccent}) {
-    return const SnappingPosition.factor(
-        positionFactor: 1.0,
-        grabbingContentOffset: GrabbingContentOffset.bottom);
   }
 }

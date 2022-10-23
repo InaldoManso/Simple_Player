@@ -1,6 +1,6 @@
 name: simple_player
 description: SimplePlayer offers all the essential tools for viewing videos in your mobile applications in a simplified way!
-version: 1.0.4
+version: 1.0.5
 homepage: https://github.com/InaldoManso/Simple_Player
 
 environment:
@@ -9,8 +9,7 @@ environment:
 
 dependencies:
   video_player: ">2.4.6 <3.0.0"
-  screen_brightness: ^0.2.2
-  snapping_sheet: ^3.1.0
+  screen_brightness: ">=0.2.2 <1.0.0"
   flutter:
     sdk: flutter
 

@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 
 class BrightnessSlider extends StatefulWidget {
-  Color? colorAccent = Colors.red;
-  BrightnessSlider({Key? key, this.colorAccent}) : super(key: key);
+  final Color colorAccent;
+  const BrightnessSlider({Key? key, required this.colorAccent})
+      : super(key: key);
 
   @override
   State<BrightnessSlider> createState() => BbrightnessStateSlider();
@@ -17,7 +18,6 @@ class BbrightnessStateSlider extends State<BrightnessSlider> {
   Constants constants = Constants();
 
   //Attributes
-  Color _colorAccent = Colors.red;
   double? _brightness = 0.0;
 
   _brightnessSetter(double brightness) async {
@@ -27,10 +27,6 @@ class BbrightnessStateSlider extends State<BrightnessSlider> {
 
   _initializeInterface() async {
     double brightness = await ScreenBrightness().current;
-
-    setState(() {
-      _colorAccent = widget.colorAccent ?? _colorAccent;
-    });
 
     //Methods
     _brightnessSetter(brightness);
@@ -52,7 +48,7 @@ class BbrightnessStateSlider extends State<BrightnessSlider> {
         ),
         Expanded(
           child: SliderTheme(
-            data: constants.getSliderThemeData(colorAccent: _colorAccent),
+            data: constants.getSliderThemeData(colorAccent: widget.colorAccent),
             child: Slider(
               value: _brightness!,
               max: 1.0,

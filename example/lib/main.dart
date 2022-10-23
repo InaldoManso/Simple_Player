@@ -20,48 +20,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Simple Example'),
-        backgroundColor: Colors.grey,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              color: Colors.blue,
-              height: 200,
-            ),
-            SimplePlayer.build(
-              simplePlayerSettings: SimplePlayerSettings.network(
-                path: url,
-                label: 'Bee',
-                aspectRatio: 16 / 9,
-                autoPlay: false,
-                loopMode: false,
-                forceAspectRatio: false,
-                colorAccent: Colors.red,
-              ),
-            ),
-            Container(
-              color: Colors.amber,
-              height: 200,
-            ),
-            Container(
-              color: Colors.red,
-              height: 200,
-            ),
-            Container(
-              color: Colors.purple,
-              height: 200,
-            ),
-            Container(
-              color: Colors.blue,
-              height: 200,
-            ),
-          ],
+          title: const Text('SimplePlayer Example'),
+          backgroundColor: Colors.grey),
+      body: Center(
+        child: SimplePlayer.build(
+          simplePlayerSettings: SimplePlayerSettings.network(
+            path: url,
+            label: 'Bee',
+            aspectRatio: 16 / 9,
+            autoPlay: false,
+            loopMode: true,
+            forceAspectRatio: false,
+            colorAccent: Colors.red,
+          ),
         ),
       ),
     );
