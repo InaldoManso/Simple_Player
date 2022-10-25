@@ -17,7 +17,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   SimpleController simpleController = SimpleController();
   String url =
-      'https://d3u0vwhyjd0jj4.cloudfront.net/attachments/555187f76d5862cf8d121f30b84f12ea1a66ad34/store/5dfa120f9e978fa43acc6c9c64b2e1e29e28b08dc04c5063700942248ce4/video_vertical.mp4';
+      'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
 
   //Attributes
   String currentPosition = '...';

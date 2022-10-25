@@ -69,10 +69,15 @@ simpleController.listenPosition().listen((event) {
 &nbsp;
 <img align="rigth" alt="Simple Player" src="https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/menu.png">
 
-### FullScreen:
-<img align="left" alt="Simple Player" src="https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/player.png">
+</br>
 
-</div><div></br></br>
+### FullScreen:
+<img align="center" alt="Simple Player" src="https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/player.png">
+
+
+</br>
+</br>
+
 
 ## Good coding! 😎💙
 #### Follow me on: https://github.com/InaldoManso
