@@ -1,41 +1,45 @@
 library simple_player;
 
 //Packages
+import 'package:simple_player/aplication/simple_controller.dart';
 import 'package:simple_player/presentation/simple_player_screen.dart';
 import 'package:simple_player/model/simple_player_settings.dart';
 import 'package:flutter/material.dart';
 //Resources
+export 'aplication/simple_controller.dart';
 export 'model/simple_player_settings.dart';
 
-class SimplePlayer {
-  SimplePlayer();
+class SimplePlayer extends StatefulWidget {
+  final SimplePlayerSettings simplePlayerSettings;
+  final SimpleController simpleController;
 
   ///A Simple and ready to use Player!
   ///
   ///Make sure:
-  ///- always call the extension: SimplePlayer.network()
+  ///- always call the extension:
+  ///  SimplePlayerSettings.network() or SimplePlayerSettings.assets()
   ///- perform the import do: import 'package:flutter/material.dart';
   ///
   ///To ensure a good functioning of the Package.
   ///
   ///
-  ///You must pass a : SimplePlayerSettings();
-  ///
   /// ```dart
-  /////exmaple:
+  ///
+  /// //exmaple:
   ///
   /// String url = 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
   ///
-  ///SimplePlayer.build(
-  ///  simplePlayerSettings: SimplePlayerSettings(
-  ///    simplePathType: SimplePathType.network(url: url),
-  ///    label: 'Bee',
-  ///    aspectRatio: 16 / 9,
-  ///    autoPlay: false,
-  ///    loopMode: false,
-  ///    colorAccent: Colors.red
-  ///  ),
-  ///),
+  /// SimplePlayer(
+  ///   simplePlayerSettings: SimplePlayerSettings.network(
+  ///     path: url,
+  ///     label: 'Bee',
+  ///     aspectRatio: 16 / 9,
+  ///     autoPlay: false,
+  ///     loopMode: true,
+  ///     forceAspectRatio: false,
+  ///     colorAccent: Colors.red,
+  ///   ),
+  /// )
   /// ```
   ///
   /// {@tool snippet}
@@ -46,8 +50,22 @@ class SimplePlayer {
   ///
   ///Good coding! 😎💙
   ///
+  const SimplePlayer(
+      {Key? key,
+      required this.simpleController,
+      required this.simplePlayerSettings})
+      : super(key: key);
 
-  static Widget build({SimplePlayerSettings? simplePlayerSettings}) {
-    return SimplePlayerScrren(simplePlayerSettings: simplePlayerSettings!);
+  @override
+  State<SimplePlayer> createState() => _SimplePlayerState();
+}
+
+class _SimplePlayerState extends State<SimplePlayer> {
+  @override
+  Widget build(BuildContext context) {
+    return SimplePlayerScrren(
+      simpleController: widget.simpleController,
+      simplePlayerSettings: widget.simplePlayerSettings,
+    );
   }
 }

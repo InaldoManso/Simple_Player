@@ -1,6 +1,6 @@
+import 'package:simple_player/simple_player.dart';
 import 'package:video_player/video_player.dart';
 import '../aplication/simple_aplication.dart';
-import '../model/simple_player_settings.dart';
 import '../model/simple_player_state.dart';
 import 'package:flutter/material.dart';
 import 'widgets/settings_screen.dart';
@@ -9,10 +9,12 @@ import '../constants/constants.dart';
 import 'dart:async';
 
 class SimplePlayerFullScreen extends StatefulWidget {
+  final SimpleController simpleController;
   final SimplePlayerSettings simplePlayerSettings;
   final SimplePlayerState simplePlayerState;
   const SimplePlayerFullScreen(
       {Key? key,
+      required this.simpleController,
       required this.simplePlayerSettings,
       required this.simplePlayerState})
       : super(key: key);
@@ -83,33 +85,6 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     _videoPlayerController.setPlaybackSpeed(speed!);
   }
 
-  _visibleControlManager(double position) {
-    if (position < 0.3 && !_visibleSheetControls!) {
-      setState(() {
-        _visibleSheetControls = true;
-      });
-    } else if (position > 0.3 && _visibleSheetControls!) {
-      setState(() {
-        _visibleSheetControls = false;
-      });
-    }
-  }
-
-  _sheetMove(double position) {
-    bool playing = _videoPlayerController.value.isPlaying;
-    if (position > 0.5 && !playing) {
-      //play
-      if (_wasPlaying!) {
-        _playAndPauseSwitch();
-      } else {
-        _showAndHideControls(true);
-      }
-    } else if (position < 0.5 && playing) {
-      //pause
-      _playAndPauseSwitch();
-    }
-  }
-
   _fullScreenManager() {
     //UnlockRotation
     simpleAplication.lockAndUnlockScreen(false);
@@ -169,6 +144,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   _secondsListener() {
     _videoPlayerController.addListener(
       () {
+        widget.simpleController.updateController(_videoPlayerController);
         bool playing = _videoPlayerController.value.isPlaying;
         if (_currentSeconds == _totalSeconds && !playing) {
           _showAndHideControls(true);
