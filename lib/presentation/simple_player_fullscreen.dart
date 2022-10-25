@@ -38,13 +38,13 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   double? _speed = 1.0;
   String? _showTime = '-:-';
   String? _tittle = '';
-  bool? _visibleSheetControls = false;
   bool? _visibleSettings = false;
   bool? _visibleControls = true;
   bool? _wasPlaying = false;
   bool? _confortMode = false;
   Color? _colorAccent = Colors.red;
 
+  //Control settings block display.
   _showScreenSettings() {
     bool playing = _videoPlayerController.value.isPlaying;
     if (_visibleSettings! && !playing) {
@@ -66,6 +66,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     }
   }
 
+  //Controls whether or not to force image distortion.
   double _aspectRatioManager(VideoPlayerController controller) {
     if (simplePlayerSettings.forceAspectRatio!) {
       return simplePlayerSettings.aspectRatio!;
@@ -74,17 +75,20 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     }
   }
 
+  //Controls the display of simple controls.
   _showAndHideControls(bool show) {
     setState(() {
       _visibleControls = show;
     });
   }
 
+  //Controls the video playback speed.
   _speedSetter(double? speed) async {
     setState(() => _speed = speed);
     _videoPlayerController.setPlaybackSpeed(speed!);
   }
 
+  //Responsible for sending all data to the environment in full screen.
   _fullScreenManager() {
     //UnlockRotation
     simpleAplication.lockAndUnlockScreen(false);
@@ -105,6 +109,23 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     Navigator.pop(context, simplePlayerState);
   }
 
+  //Retrieves and inserts the last state of the previous screen
+  _lastState() {
+    SimplePlayerState simplePlayerState = widget.simplePlayerState;
+
+    setState(() {
+      _speed = simplePlayerState.speed;
+      _tittle = simplePlayerState.label;
+      _wasPlaying = simplePlayerState.wasPlaying;
+      _confortMode = simplePlayerState.confortMode;
+    });
+
+    _videoPlayerController.setLooping(simplePlayerState.loopMode!);
+    _jumpTo(simplePlayerState.currentSeconds!);
+    _speedSetter(simplePlayerState.speed);
+  }
+
+  // Sends playback to the specified point.
   _jumpTo(double value) {
     _videoPlayerController.seekTo(Duration(milliseconds: value.toInt()));
 
@@ -113,6 +134,8 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     }
   }
 
+  // Extremely precise control of all animations
+  // in conjunction with play and pause of playback.
   _playAndPauseSwitch({bool pauseButton = false}) {
     bool playing = _videoPlayerController.value.isPlaying;
     if (playing) {
@@ -133,6 +156,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     }
   }
 
+  //Treat screen tapping to show or hide simple controllers.
   _screenTap() {
     if (_visibleControls!) {
       _showAndHideControls(false);
@@ -141,26 +165,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     }
   }
 
-  _secondsListener() {
-    _videoPlayerController.addListener(
-      () {
-        widget.simpleController.updateController(_videoPlayerController);
-        bool playing = _videoPlayerController.value.isPlaying;
-        if (_currentSeconds == _totalSeconds && !playing) {
-          _showAndHideControls(true);
-          _animationController.reverse();
-          _jumpTo(0.0);
-        }
-        setState(() {
-          _currentSeconds =
-              _videoPlayerController.value.position.inMilliseconds.toDouble();
-          _showTime = DateFormatter()
-              .currentTime(_videoPlayerController.value.position);
-        });
-      },
-    );
-  }
-
+  //Responsible for correct initialization of all controllers.
   _setupControllers(SimplePlayerSettings simplePlayerSettings) {
     //Video controller
     _videoPlayerController = simpleAplication.getControler(simplePlayerSettings)
@@ -184,22 +189,44 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     );
   }
 
-  _lastState() {
-    //Retrieves and inserts the last state of the previous screen
-    SimplePlayerState simplePlayerState = widget.simplePlayerState;
-
-    setState(() {
-      _speed = simplePlayerState.speed;
-      _tittle = simplePlayerState.label;
-      _wasPlaying = simplePlayerState.wasPlaying;
-      _confortMode = simplePlayerState.confortMode;
-    });
-
-    _videoPlayerController.setLooping(simplePlayerState.loopMode!);
-    _jumpTo(simplePlayerState.currentSeconds!);
-    _speedSetter(simplePlayerState.speed);
+  //Update the real-time seconds counter on replay.
+  _secondsListener() {
+    _videoPlayerController.addListener(
+      () {
+        widget.simpleController.updateController(_videoPlayerController);
+        bool playing = _videoPlayerController.value.isPlaying;
+        if (_currentSeconds == _totalSeconds && !playing) {
+          _showAndHideControls(true);
+          _animationController.reverse();
+          _jumpTo(0.0);
+        }
+        setState(() {
+          _currentSeconds =
+              _videoPlayerController.value.position.inMilliseconds.toDouble();
+          _showTime = DateFormatter()
+              .currentTime(_videoPlayerController.value.position);
+        });
+      },
+    );
   }
 
+  //Shows or hides the HUB from controller commands.
+  _listenerPlayFromController() {
+    String changeTime = '';
+    widget.simpleController.listenPlayAndPause().listen((event) {
+      if (changeTime != event) {
+        bool playing = _videoPlayerController.value.isPlaying;
+        if (playing) {
+          _showAndHideControls(false);
+        } else {
+          _showAndHideControls(true);
+        }
+        changeTime = event;
+      }
+    });
+  }
+
+  //Responsible for starting the interface
   _initializeInterface() {
     simplePlayerSettings = widget.simplePlayerSettings;
 
@@ -210,6 +237,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     //Methods
     _setupControllers(simplePlayerSettings);
     _secondsListener();
+    _listenerPlayFromController();
   }
 
   @override
@@ -224,6 +252,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     super.dispose();
   }
 
+  //Finalize resources
   _dismissConstrollers() async {
     _animationController.stop();
     _animationController.dispose();

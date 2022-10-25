@@ -1,3 +1,7 @@
+## 1.0.6 - Added controller ✨
+
+* Now you can control your playback without using the interface directly!
+
 ## 1.0.5 - New settings screen
 
 * A simpler and more functional look than before, focused on usability and practicality!

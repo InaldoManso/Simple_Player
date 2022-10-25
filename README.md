@@ -13,29 +13,53 @@
 
 ```dart
 //Example:
-SimplePlayer.build(
+
+SimpleController simpleController = SimpleController();
+String url =
+      'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
+
+
+SimplePlayer(
+    simpleController: simpleController,
     simplePlayerSettings: SimplePlayerSettings.network(
         path: url,
         label: 'Bee',
         aspectRatio: 16 / 9,
         autoPlay: false,
-        loopMode: false,
+        loopMode: true,
         forceAspectRatio: false,
         colorAccent: Colors.red,
     ),
 ),
 
-SimplePlayer.build(
+SimplePlayer(
+    simpleController: simpleController,
     simplePlayerSettings: SimplePlayerSettings.assets(
         path: url,
         label: 'Bee',
         aspectRatio: 16 / 9,
         autoPlay: false,
-        loopMode: false,
+        loopMode: true,
         forceAspectRatio: false,
         colorAccent: Colors.red,
     ),
 ),
+
+//Examples of controller usage.
+
+//Play:
+simpleController.play();
+
+//Pause:
+simpleController.pause()
+
+//Get current position: (return Duration)
+ simpleController.position;
+
+//Hear player position: (return Duration)
+simpleController.listenPosition().listen((event) {
+    Duration stremPosition = event.toString();
+});
 ```
 </div>
 <div>
@@ -45,6 +69,8 @@ SimplePlayer.build(
 &nbsp;
 <img align="rigth" alt="Simple Player" src="https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/menu.png">
 
+### FullScreen:
+<img align="left" alt="Simple Player" src="https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/player.png">
 
 </div><div></br></br>
 

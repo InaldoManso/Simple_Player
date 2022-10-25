@@ -17,10 +17,31 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   SimpleController simpleController = SimpleController();
   String url =
-      'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
+      'https://d3u0vwhyjd0jj4.cloudfront.net/attachments/555187f76d5862cf8d121f30b84f12ea1a66ad34/store/5dfa120f9e978fa43acc6c9c64b2e1e29e28b08dc04c5063700942248ce4/video_vertical.mp4';
 
   //Attributes
   String currentPosition = '...';
+  String stremPosition = '...';
+
+  _initListener() {
+    simpleController.listenPosition().listen((event) {
+      setState(() {
+        stremPosition = event.toString();
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    _initListener();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    simpleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     TextButton.icon(
                       label: const Text("Get Current Position"),
-                      icon: const Icon(Icons.timelapse_rounded),
+                      icon: const Icon(Icons.timer_outlined),
                       onPressed: () {
                         setState(() {
                           currentPosition =
@@ -98,18 +119,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     TextButton.icon(
-                      label: const Text("Stream Position"),
-                      icon: const Icon(Icons.timelapse_rounded),
-                      onPressed: () {
-                        setState(() {
-                          currentPosition =
-                              simpleController.position.toString();
-                        });
-                      },
+                      label: const Text(" Stream Position"),
+                      icon: const Icon(Icons.ondemand_video_rounded,
+                          color: Colors.red),
+                      onPressed: null,
                     ),
-                    Text(simpleController.position.toString())
+                    Text(stremPosition)
                   ],
-                )
+                ),
               ],
             ),
           ),

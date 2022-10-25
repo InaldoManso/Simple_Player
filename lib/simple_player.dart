@@ -27,9 +27,11 @@ class SimplePlayer extends StatefulWidget {
   ///
   /// //exmaple:
   ///
+  /// SimpleController simpleController = SimpleController();
   /// String url = 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
   ///
   /// SimplePlayer(
+  ///   simpleController: simpleController,
   ///   simplePlayerSettings: SimplePlayerSettings.network(
   ///     path: url,
   ///     label: 'Bee',
@@ -46,8 +48,9 @@ class SimplePlayer extends StatefulWidget {
   ///
   ///The player should behave like this:
   ///
-  /// ![bee](https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/bee.png)
+  /// ![bee](https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/player.png)
   ///
+  ///Keep an eye out for examples. 🕶️
   ///Good coding! 😎💙
   ///
   const SimplePlayer(
