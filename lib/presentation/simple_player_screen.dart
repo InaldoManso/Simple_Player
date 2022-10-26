@@ -95,6 +95,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
       _animationController.forward();
       _videoPlayerController.play();
       _wasPlaying = true;
+      _showAndHideControls(false);
     }
   }
 

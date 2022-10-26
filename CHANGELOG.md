@@ -1,3 +1,8 @@
+## 1.0.7 - Added controller and Adjust ✨
+
+* Now you can control your playback without using the interface directly!
+* Adjusted autoplay
+
 ## 1.0.6 - Added controller ✨
 
 * Now you can control your playback without using the interface directly!

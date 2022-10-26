@@ -1,6 +1,6 @@
 name: simple_player
 description: SimplePlayer offers all the essential tools for viewing videos in your mobile applications in a simplified way!
-version: 1.0.61
+version: 1.0.7
 homepage: https://github.com/InaldoManso/Simple_Player
 
 environment:
