@@ -1,3 +1,7 @@
+## 1.0.8 - Added controller and Adjust ✨
+
+* Video loading screen
+
 ## 1.0.7 - Added controller and Adjust ✨
 
 * Now you can control your playback without using the interface directly!
