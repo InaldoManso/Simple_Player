@@ -1,3 +1,7 @@
+## 1.1.0 - Options widget ⌨️✨
+
+* Improvements made to the scale and behavior of the playback adjustment widget
+
 ## 1.0.8 - Added controller and Adjust ✨
 
 * Video loading screen
