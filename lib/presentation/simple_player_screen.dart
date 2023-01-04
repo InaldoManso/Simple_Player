@@ -24,12 +24,12 @@ class SimplePlayerScrren extends StatefulWidget {
 
 class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     with SingleTickerProviderStateMixin {
-  //Classes and Packages
+  /// Classes and Packages
   SimpleAplication simpleAplication = SimpleAplication();
   late SimplePlayerSettings simplePlayerSettings;
   Constants constants = Constants();
 
-  //Attributes
+  /// Attributes
   late VideoPlayerController _videoPlayerController;
   late AnimationController _animationController;
   double? _currentSeconds = 0.0;
@@ -45,11 +45,11 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   bool? _confortMode = false;
   Color? _colorAccent = Colors.red;
 
-  //Control settings block display.
+  /// Control settings block display.
   _showScreenSettings() {
     bool playing = _videoPlayerController.value.isPlaying;
     if (_visibleSettings! && !playing) {
-      //play
+      /// play
       if (_wasPlaying!) {
         _playAndPauseSwitch();
         setState(() => _visibleSettings = false);
@@ -58,7 +58,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
         _showAndHideControls(true);
       }
     } else if (!_visibleSettings! && playing) {
-      //pause
+      /// pause
       _playAndPauseSwitch();
       setState(() => _visibleSettings = true);
     } else if (!_visibleSettings!) {
@@ -67,7 +67,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     }
   }
 
-  //Controls whether or not to force image distortion.
+  /// Controls whether or not to force image distortion.
   double _aspectRatioManager(VideoPlayerController controller) {
     if (simplePlayerSettings.forceAspectRatio!) {
       return simplePlayerSettings.aspectRatio!;
@@ -76,20 +76,20 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     }
   }
 
-  //Controls the display of simple controls.
+  /// Controls the display of simple controls.
   _showAndHideControls(bool show) {
     setState(() {
       _visibleControls = show;
     });
   }
 
-  //Controls the video playback speed.
+  /// Controls the video playback speed.
   _speedSetter(double? speed) async {
     setState(() => _speed = speed);
     _videoPlayerController.setPlaybackSpeed(speed!);
   }
 
-  //Checks if the video should be displayed in looping.
+  /// Checks if the video should be displayed in looping.
   _autoPlayChecker(bool? autoPlay) {
     if (autoPlay!) {
       _animationController.forward();
@@ -99,7 +99,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     }
   }
 
-  //Responsible for sending all data to the environment in full screen.
+  /// Responsible for sending all data to the environment in full screen.
   _fullScreenManager() {
     SimplePlayerState simplePlayerState = SimplePlayerState(
         currentSeconds: _currentSeconds,
@@ -114,9 +114,10 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
 
     if (_videoPlayerController.value.isPlaying) _playAndPauseSwitch();
 
-    //LockRotation
+    /// LockRotation
     simpleAplication.lockAndUnlockScreen(true);
-    //FullScreenActivate
+
+    /// FullScreenActivate
     simpleAplication.hideNavigation(true).then((value) {
       Timer(const Duration(milliseconds: 50), () {
         Navigator.push(
@@ -133,7 +134,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     });
   }
 
-  //Retrieves and inserts the last state of the previous screen
+  /// Retrieves and inserts the last state of the previous screen
   _lastState(SimplePlayerState simplePlayerState) {
     bool playing = false;
     setState(() {
@@ -152,17 +153,17 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     }
   }
 
-  // Sends playback to the specified point.
+  ///  Sends playback to the specified point.
   _jumpTo(double value) {
     _videoPlayerController.seekTo(Duration(milliseconds: value.toInt()));
   }
 
-  // Extremely precise control of all animations
-  // in conjunction with play and pause of playback.
+  ///  Extremely precise control of all animations
+  ///  in conjunction with play and pause of playback.
   _playAndPauseSwitch({bool pauseButton = false}) {
     bool playing = _videoPlayerController.value.isPlaying;
     if (playing) {
-      //pause
+      /// pause
       if (pauseButton) {
         _wasPlaying = !playing;
       } else {
@@ -171,7 +172,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
       _animationController.reverse();
       _videoPlayerController.pause();
     } else {
-      //play
+      /// play
       _wasPlaying = playing;
       _animationController.forward();
       _videoPlayerController.play();
@@ -179,7 +180,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     }
   }
 
-  //Treat screen tapping to show or hide simple controllers.
+  /// Treat screen tapping to show or hide simple controllers.
   _screenTap() {
     if (_visibleControls!) {
       _showAndHideControls(false);
@@ -188,9 +189,9 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     }
   }
 
-  //Responsible for correct initialization of all controllers.
+  /// Responsible for correct initialization of all controllers.
   _setupControllers(SimplePlayerSettings simplePlayerSettings) {
-    //Video controller
+    /// Video controller
     _videoPlayerController = simpleAplication.getControler(simplePlayerSettings)
       ..initialize().then(
         (_) {
@@ -200,12 +201,12 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
             _videoPlayerController.setLooping(_loopMode!);
           });
 
-          //Methods after settings
+          /// Methods after settings
           _autoPlayChecker(_autoPlay);
         },
       );
 
-    //Icons controller
+    /// Icons controller
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
@@ -213,7 +214,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     );
   }
 
-  //Update the real-time seconds counter on replay.
+  /// Update the real-time seconds counter on replay.
   _secondsListener() {
     _videoPlayerController.addListener(
       () {
@@ -234,7 +235,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     );
   }
 
-  //Shows or hides the HUB from controller commands.
+  /// Shows or hides the HUB from controller commands.
   _listenerPlayFromController() {
     String changeTime = '';
     widget.simpleController.listenPlayAndPause().listen((event) {
@@ -250,7 +251,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     });
   }
 
-  //Responsible for starting the interface
+  /// Responsible for starting the interface
   _initializeInterface() {
     setState(() {
       simplePlayerSettings = widget.simplePlayerSettings;
@@ -260,7 +261,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
       _colorAccent = widget.simplePlayerSettings.colorAccent;
     });
 
-    //Methods
+    /// Methods
     _setupControllers(simplePlayerSettings);
     _secondsListener();
     _listenerPlayFromController();
@@ -278,7 +279,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     super.dispose();
   }
 
-  //Finalize resources
+  /// Finalize resources
   _dismissConstrollers() async {
     _animationController.stop();
     _animationController.dispose();

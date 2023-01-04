@@ -13,11 +13,11 @@ class BrightnessSlider extends StatefulWidget {
 }
 
 class BbrightnessStateSlider extends State<BrightnessSlider> {
-  //Classes and Packages
+  /// Classes and Packages
   SimpleAplication simpleAplication = SimpleAplication();
   Constants constants = Constants();
 
-  //Attributes
+  /// Attributes
   double? _brightness = 0.0;
 
   _brightnessSetter(double brightness) async {
@@ -28,7 +28,7 @@ class BbrightnessStateSlider extends State<BrightnessSlider> {
   _initializeInterface() async {
     double brightness = await ScreenBrightness().current;
 
-    //Methods
+    /// Methods
     _brightnessSetter(brightness);
   }
 

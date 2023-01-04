@@ -1,3 +1,7 @@
+## 1.1.1 - adjustments 🛟
+
+* documentation adjustments
+
 ## 1.1.0 - Options widget ⌨️✨
 
 * Improvements made to the scale and behavior of the playback adjustment widget

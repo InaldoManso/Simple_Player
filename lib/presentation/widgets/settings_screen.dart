@@ -25,7 +25,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  //ReturnValue
+  /// ReturnValue
   void _onExit() => widget.onExit!();
   void _confortCallBack(bool value) => widget.confortClicked(value);
   void _speedCallBack(double value) => widget.speedSelected(value);
@@ -33,24 +33,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Standardized color so that it does not harm the user's eyes.
+      ///  Standardized color so that it does not harm the user's eyes.
       color: Colors.black38,
       child: Center(
         child: Container(
-          // Maximum display size.
+          ///  Maximum display size.
           constraints: const BoxConstraints(maxWidth: 400),
-          // Spacers that provide a more pleasant layout.
+
+          ///  Spacers that provide a more pleasant layout.
           padding: const EdgeInsets.all(8),
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-              // Standardized color so that it does not harm the user's eyes.
+
+              ///  Standardized color so that it does not harm the user's eyes.
               color: Colors.grey[850]!,
               borderRadius: const BorderRadius.all(Radius.circular(24))),
           child: AspectRatio(
-            // The controller has its standard appearance
-            // so that it does not suffer from distortions
-            // in the display on tablets and other
-            // smartphones with peculiar sizes.
+            ///  The controller has its standard appearance
+            ///  so that it does not suffer from distortions
+            ///  in the display on tablets and other
+            ///  smartphones with peculiar sizes.
             aspectRatio: 16 / 9,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -76,9 +78,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // Here, a yellow filter is applied
-                      // so that the user can avoid blue
-                      // light at night or an eventual eye strain.
+                      ///  Here, a yellow filter is applied
+                      ///  so that the user can avoid blue
+                      ///  light at night or an eventual eye strain.
                       Material(
                         color: Colors.transparent,
                         child: IconButton(
@@ -95,9 +97,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           },
                         ),
                       ),
-                      // The 'ExitButton' of the options widget
-                      // is locked to this button so that an accidental
-                      // bump on the screen causes a bad user experience.
+
+                      ///  The 'ExitButton' of the options widget
+                      ///  is locked to this button so that an accidental
+                      ///  bump on the screen causes a bad user experience.
                       Material(
                         color: Colors.transparent,
                         child: IconButton(

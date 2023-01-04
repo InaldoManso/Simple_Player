@@ -1,11 +1,12 @@
 library simple_player;
 
-//Packages
+/// Packages
 import 'package:simple_player/aplication/simple_controller.dart';
 import 'package:simple_player/presentation/simple_player_screen.dart';
 import 'package:simple_player/model/simple_player_settings.dart';
 import 'package:flutter/material.dart';
-//Resources
+
+/// Resources
 export 'aplication/simple_controller.dart';
 export 'model/simple_player_settings.dart';
 

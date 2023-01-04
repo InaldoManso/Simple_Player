@@ -6,7 +6,8 @@ class DateFormatter {
     String hour = list[0];
     String minutes = list[1];
     String seconds = list[2].split('.')[0];
-    //String milliseconds = list[2].split('.')[1];
+
+    /// String milliseconds = list[2].split('.')[1];
 
     if (hour != '0') {
       return '$hour:$minutes:$seconds';

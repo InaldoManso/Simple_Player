@@ -17,7 +17,7 @@ class PlaybackSpeedOptions extends StatefulWidget {
 }
 
 class PplaybackSpeedOptionsState extends State<PlaybackSpeedOptions> {
-  //ReturnValue
+  /// ReturnValue
   void _setCallBack(double value) {
     widget.speedSelected(value);
   }
