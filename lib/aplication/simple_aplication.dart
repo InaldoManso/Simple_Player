@@ -51,14 +51,14 @@ class SimpleAplication {
     if (lock) {
       if (aspectRatio <= 1.0) {
         await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.landscapeRight,
-          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
         ]);
         return true;
       } else {
         await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.portraitUp,
-          DeviceOrientation.portraitDown,
+          DeviceOrientation.landscapeRight,
+          DeviceOrientation.landscapeLeft,
         ]);
         return true;
       }

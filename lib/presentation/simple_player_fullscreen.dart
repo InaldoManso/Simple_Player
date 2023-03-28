@@ -146,7 +146,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
 
     /// Release the display of the interface
     setState(() {
-      _landscape = ratio < 0.99;
+      _landscape = ratio > 1.0;
       _playbackSetUp = true;
     });
   }
@@ -302,7 +302,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
       child: Material(
         color: Colors.black,
         child: RotatedBox(
-          quarterTurns: _landscape! ? 0 : 1,
+          quarterTurns: _landscape! ? 1 : 0,
           child: _playbackSetUp!
               ? Container(
                   width: width,
