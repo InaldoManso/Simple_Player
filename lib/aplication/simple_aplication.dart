@@ -46,19 +46,30 @@ class SimpleAplication {
     }
   }
 
-  lockAndUnlockScreen(bool lock) {
+  Future<bool> lockAndUnlockScreen(
+      {required bool lock, double aspectRatio = 1.0}) async {
     if (lock) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
+      if (aspectRatio <= 1.0) {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeRight,
+          DeviceOrientation.landscapeLeft,
+        ]);
+        return true;
+      } else {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]);
+        return true;
+      }
     } else {
-      SystemChrome.setPreferredOrientations([
+      await SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeRight,
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
       ]);
+      return true;
     }
   }
 }

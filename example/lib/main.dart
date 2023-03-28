@@ -60,96 +60,98 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
           title: const Text('SimplePlayer Example'),
           backgroundColor: Colors.grey),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Player wrapped in a padding.
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SimplePlayer(
-              simpleController: simpleController,
-              simplePlayerSettings: SimplePlayerSettings.network(
-                // Only the path is required, all other parameters are optional
-                path: url,
-                label: 'Bee',
-                aspectRatio: 16 / 9,
-                autoPlay: false,
-                loopMode: true,
-                forceAspectRatio: false,
-                colorAccent: Colors.red,
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Player wrapped in a padding.
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SimplePlayer(
+                simpleController: simpleController,
+                simplePlayerSettings: SimplePlayerSettings.network(
+                  // Only the path is required, all other parameters are optional
+                  path: url,
+                  label: 'Bee',
+                  aspectRatio: 16 / 9,
+                  autoPlay: false,
+                  loopMode: true,
+                  forceAspectRatio: false,
+                  colorAccent: Colors.red,
+                ),
               ),
             ),
-          ),
 
-          // Start using the controller.
-          Container(
-            margin: const EdgeInsets.all(8.0),
-            padding: const EdgeInsets.all(8.0),
-            color: Colors.blue.withOpacity(0.1),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'Using the controller',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.red),
-                ),
-                const Divider(thickness: 2),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    TextButton.icon(
-                      label: const Text("Play Video"),
-                      icon: const Icon(Icons.play_arrow_rounded),
-                      onPressed: () {
-                        // Does not require setState to play.
-                        simpleController.play();
-                      },
-                    ),
-                    TextButton.icon(
-                      label: const Text("Pause Video"),
-                      icon: const Icon(Icons.pause_rounded),
-                      onPressed: () {
-                        // Does not require setState to pause.
-                        simpleController.pause();
-                      },
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    TextButton.icon(
-                      label: const Text("Get Current Position"),
-                      icon: const Icon(Icons.timer_outlined),
-                      onPressed: () {
-                        //Requires setState to update seconds counter.
-                        setState(() {
-                          currentPosition =
-                              simpleController.position.toString();
-                        });
-                      },
-                    ),
-                    Text(currentPosition)
-                  ],
-                ),
-                // Here the result of the listener is displayed
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    TextButton.icon(
-                      label: const Text(" Stream Position"),
-                      icon: const Icon(Icons.ondemand_video_rounded,
-                          color: Colors.red),
-                      onPressed: null,
-                    ),
-                    Text(stremPosition)
-                  ],
-                ),
-              ],
+            // Start using the controller.
+            Container(
+              margin: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
+              color: Colors.blue.withOpacity(0.1),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Using the controller',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.red),
+                  ),
+                  const Divider(thickness: 2),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton.icon(
+                        label: const Text("Play Video"),
+                        icon: const Icon(Icons.play_arrow_rounded),
+                        onPressed: () {
+                          // Does not require setState to play.
+                          simpleController.play();
+                        },
+                      ),
+                      TextButton.icon(
+                        label: const Text("Pause Video"),
+                        icon: const Icon(Icons.pause_rounded),
+                        onPressed: () {
+                          // Does not require setState to pause.
+                          simpleController.pause();
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton.icon(
+                        label: const Text("Get Current Position"),
+                        icon: const Icon(Icons.timer_outlined),
+                        onPressed: () {
+                          //Requires setState to update seconds counter.
+                          setState(() {
+                            currentPosition =
+                                simpleController.position.toString();
+                          });
+                        },
+                      ),
+                      Text(currentPosition)
+                    ],
+                  ),
+                  // Here the result of the listener is displayed
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton.icon(
+                        label: const Text(" Stream Position"),
+                        icon: const Icon(Icons.ondemand_video_rounded,
+                            color: Colors.red),
+                        onPressed: null,
+                      ),
+                      Text(stremPosition)
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

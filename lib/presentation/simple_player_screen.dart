@@ -52,16 +52,22 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
       /// play
       if (_wasPlaying!) {
         _playAndPauseSwitch();
+
+        /// Hide the control interface
         setState(() => _visibleSettings = false);
       } else {
+        /// Hide the control interface
         setState(() => _visibleSettings = false);
         _showAndHideControls(true);
       }
     } else if (!_visibleSettings! && playing) {
       /// pause
       _playAndPauseSwitch();
+
+      /// Switch to displaying the control interface
       setState(() => _visibleSettings = true);
     } else if (!_visibleSettings!) {
+      /// Switch to displaying the control interface
       setState(() => _visibleSettings = true);
       _showAndHideControls(false);
     }
@@ -69,6 +75,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
 
   /// Controls whether or not to force image distortion.
   double _aspectRatioManager(VideoPlayerController controller) {
+    /// Check if there is a predefined AspectRatio
     if (simplePlayerSettings.forceAspectRatio!) {
       return simplePlayerSettings.aspectRatio!;
     } else {
@@ -78,6 +85,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
 
   /// Controls the display of simple controls.
   _showAndHideControls(bool show) {
+    /// Show the control interface
     setState(() {
       _visibleControls = show;
     });
@@ -115,11 +123,13 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     if (_videoPlayerController.value.isPlaying) _playAndPauseSwitch();
 
     /// LockRotation
-    simpleAplication.lockAndUnlockScreen(true);
+    double ratio = _videoPlayerController.value.aspectRatio;
+    simpleAplication.lockAndUnlockScreen(lock: true, aspectRatio: ratio);
 
     /// FullScreenActivate
     simpleAplication.hideNavigation(true).then((value) {
       Timer(const Duration(milliseconds: 50), () {
+        /// Send to FullScreen
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -128,6 +138,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                   simplePlayerSettings: simplePlayerSettings,
                   simplePlayerState: simplePlayerState),
             )).then((value) {
+          /// Retrieves and inserts the last state of the previous screen
           _lastState(value);
         });
       });
@@ -176,6 +187,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
       _wasPlaying = playing;
       _animationController.forward();
       _videoPlayerController.play();
+
+      /// Configure a Delay to hide the interface controls
       Timer(const Duration(seconds: 1), () => _showAndHideControls(false));
     }
   }
@@ -269,6 +282,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
 
   @override
   void initState() {
+    /// Method responsible for initializing
+    /// all methods in the correct order
     _initializeInterface();
     super.initState();
   }

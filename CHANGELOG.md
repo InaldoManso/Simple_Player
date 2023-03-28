@@ -1,10 +1,14 @@
+## 1.1.2 - FullScreen adjustments 📺✨
+
+* FullScreen mode now respects the Aspect Ratio of the played video: portrait and landscape.
+
 ## 1.1.1 - adjustments 🛟
 
-* documentation adjustments
+* documentation adjustments.
 
 ## 1.1.0 - Options widget ⌨️✨
 
-* Improvements made to the scale and behavior of the playback adjustment widget
+* Improvements made to the scale and behavior of the playback adjustment widget.
 
 ## 1.0.8 - Added controller and Adjust ✨
 
