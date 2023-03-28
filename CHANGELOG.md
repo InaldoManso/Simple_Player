@@ -1,4 +1,4 @@
-## 1.1.3 - FullScreen adjustments 📺✨
+## 1.1.4 - FullScreen adjustments 📺✨
 
 * FullScreen mode now respects the Aspect Ratio of the played video: portrait and landscape.
 

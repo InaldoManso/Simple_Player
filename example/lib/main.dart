@@ -18,8 +18,7 @@ class _MyHomePageState extends State<MyHomePage> {
   SimpleController simpleController = SimpleController();
   // Example link provided in the video_player package on which SimplePlayer is based.
   String url =
-      // 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
-      'https://assets.mixkit.co/videos/preview/mixkit-womans-feet-splashing-in-the-pool-1261-large.mp4';
+      'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
 
   // Attributes
   String currentPosition = '...';
