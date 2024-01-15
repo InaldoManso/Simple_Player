@@ -12,7 +12,7 @@
 </br><div>
 
 ```dart
-//Example:
+/// Example:
 
 SimpleController simpleController = SimpleController();
 String url =
@@ -45,18 +45,18 @@ SimplePlayer(
     ),
 ),
 
-//Examples of controller usage.
+/// Examples of controller usage:
 
-//Play:
+// Play
 simpleController.play();
 
-//Pause:
+// Pause
 simpleController.pause()
 
-//Get current position: (return Duration)
+// Get current position (return Duration)
  simpleController.position;
 
-//Hear player position: (return Duration)
+// Hear player position (return Duration)
 simpleController.listenPosition().listen((event) {
     Duration stremPosition = event.toString();
 });

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class SimplePlayerSettings {
-  String? type;
-  String? path;
-  String? label;
-  double? aspectRatio;
-  bool? autoPlay;
-  bool? loopMode;
-  bool? forceAspectRatio;
-  Color? colorAccent;
+  String type;
+  String path;
+  String label;
+  double aspectRatio;
+  bool autoPlay;
+  bool loopMode;
+  bool forceAspectRatio;
+  Color colorAccent;
 
   SimplePlayerSettings({
     required this.type,
@@ -60,41 +60,39 @@ class SimplePlayerSettings {
 
   factory SimplePlayerSettings.network(
       {required String path,
-      String? label = '',
-      double? aspectRatio = 16 / 9,
-      bool? autoPlay = false,
-      bool? loopMode = false,
-      bool? forceAspectRatio = false,
-      Color? colorAccent = Colors.red}) {
+      String? label,
+      double? aspectRatio,
+      bool? autoPlay,
+      bool? loopMode,
+      bool? forceAspectRatio,
+      Color? colorAccent}) {
     return SimplePlayerSettings(
-      type: 'network',
-      path: path,
-      label: label,
-      aspectRatio: aspectRatio,
-      autoPlay: autoPlay,
-      loopMode: loopMode,
-      forceAspectRatio: forceAspectRatio,
-      colorAccent: colorAccent,
-    );
+        type: 'network',
+        path: path,
+        label: label ?? '',
+        aspectRatio: aspectRatio ?? 16 / 9,
+        autoPlay: autoPlay ?? false,
+        loopMode: loopMode ?? false,
+        forceAspectRatio: forceAspectRatio ?? false,
+        colorAccent: colorAccent ?? Colors.red);
   }
 
   factory SimplePlayerSettings.assets(
       {required String path,
-      String? label = '',
-      double? aspectRatio = 16 / 9,
-      bool? autoPlay = false,
-      bool? loopMode = false,
-      bool? forceAspectRatio = false,
-      Color? colorAccent = Colors.red}) {
+      String? label,
+      double? aspectRatio,
+      bool? autoPlay,
+      bool? loopMode,
+      bool? forceAspectRatio,
+      Color? colorAccent}) {
     return SimplePlayerSettings(
-      type: 'assets',
-      path: path,
-      label: label,
-      aspectRatio: aspectRatio,
-      autoPlay: autoPlay,
-      loopMode: loopMode,
-      forceAspectRatio: forceAspectRatio,
-      colorAccent: colorAccent,
-    );
+        type: 'assets',
+        path: path,
+        label: label ?? '',
+        aspectRatio: aspectRatio ?? 16 / 9,
+        autoPlay: autoPlay ?? false,
+        loopMode: loopMode ?? false,
+        forceAspectRatio: forceAspectRatio ?? false,
+        colorAccent: colorAccent ?? Colors.red);
   }
 }
