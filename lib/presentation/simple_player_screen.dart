@@ -1,20 +1,18 @@
-import 'dart:math';
-
-import 'widgets/settings_screen.dart';
+import 'package:simple_player/model/simple_player_state.dart';
 import 'package:simple_player/simple_player.dart';
 import 'package:video_player/video_player.dart';
 import '../aplication/simple_aplication.dart';
-import '../model/simple_player_state.dart';
 import 'simple_player_fullscreen.dart';
 import 'package:flutter/material.dart';
+import 'widgets/settings_screen.dart';
 import '../constants/constants.dart';
 import '../core/date_formatter.dart';
 import 'dart:async';
 
 class SimplePlayerScrren extends StatefulWidget {
+  final VideoPlayerController videoPlayerController;
   final SimplePlayerSettings simplePlayerSettings;
   final SimpleController simpleController;
-  final VideoPlayerController videoPlayerController;
   const SimplePlayerScrren(
       {Key? key,
       required this.simpleController,
@@ -28,57 +26,140 @@ class SimplePlayerScrren extends StatefulWidget {
 
 class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     with SingleTickerProviderStateMixin {
-  // /// Classes and Packages
+  /// Classes and Packages
   SimpleAplication simpleAplication = SimpleAplication();
-  // late SimplePlayerSettings simplePlayerSettings;
-  // Constants constants = Constants();
 
-  // /// Attributes
-  late VideoPlayerController _videoPlayerController;
-  // late AnimationController _animationController;
-  // double? _currentSeconds = 0.0;
-  // double? _totalSeconds = 0.0;
-  // double? _speed = 1.0;
-  // String? _showTime = '-:-';
-  // String? _tittle = '';
-  // bool? _visibleControls = true;
-  // bool? _visibleSettings = false;
-  // bool? _autoPlay = false;
-  // bool? _loopMode = false;
-  // bool? _wasPlaying = false;
-  // bool? _confortMode = false;
-  // Color? _colorAccent = Colors.red;
+  /// Attributes
+  late StreamSubscription streamSubscription;
+  late AnimationController animationController;
+  Color colorAccent = Colors.red;
+  bool visibleSettings = false;
+  bool visibleControls = true;
+  bool confortMode = false;
+  bool wasPlaying = false;
+  bool autoPlay = false;
+  String showTime = '00:00';
+  String tittle = '';
+  double currentSeconds = 0.0;
+  double totalSeconds = 0.0;
+  double speed = 1.0;
+
+  ///  Sends playback to the specified point.
+  jumpTo(double value) {
+    widget.videoPlayerController.seekTo(Duration(milliseconds: value.toInt()));
+  }
+
+  /// Shows or hides the HUB from controller commands.
+  listenerPlayFromController() {
+    String changeTime = '';
+    streamSubscription =
+        widget.simpleController.listenPlayAndPause().listen((event) {
+      if (changeTime != event) {
+        bool playing = widget.videoPlayerController.value.isPlaying;
+        if (playing) {
+          showControls(false);
+        } else {
+          showControls(true);
+        }
+        changeTime = event;
+      }
+    });
+  }
+
+  ///  Extremely precise control of all animations
+  ///  in conjunction with play and pause of playback.
+  playAndPauseSwitch({bool pauseButton = false}) {
+    bool playing = widget.videoPlayerController.value.isPlaying;
+
+    if (widget.videoPlayerController.value.isPlaying) {
+      /// pause
+      widget.videoPlayerController.pause();
+      animationController.reverse();
+    } else {
+      /// play
+      widget.videoPlayerController.play();
+      animationController.forward();
+
+      /// Configure a Delay to hide the interface controls
+      Timer(const Duration(seconds: 1), () => showControls(false));
+    }
+  }
+
+  /// Controls the display of simple controls.
+  showControls(bool show) {
+    setState(() => visibleControls = show);
+  }
+
+  /// Responsible for sending all data to the environment in full screen.
+  fullScreenManager() {
+    /// LockRotation
+    double ratio = widget.videoPlayerController.value.aspectRatio;
+    simpleAplication.lockAndUnlockScreen(lock: true, aspectRatio: ratio);
+
+    /// FullScreenActivate
+    simpleAplication.hideNavigation(true).then((value) {
+      Timer(const Duration(milliseconds: 50), () {
+        /// Send to FullScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SimplePlayerFullScreen(
+              videoPlayerController: widget.videoPlayerController,
+              simplePlayerSettings: widget.simplePlayerSettings,
+              simpleController: widget.simpleController,
+              simplePlayerState: SimplePlayerState(confortMode: confortMode),
+            ),
+          ),
+        ).then((value) {
+          SimplePlayerState simplePlayerState = value;
+          setState(() {
+            confortMode = simplePlayerState.confortMode;
+          });
+        });
+      });
+    });
+  }
+
+  /// Treat screen tapping to show or hide simple controllers.
+  screenTap() {
+    setState(() => visibleControls = !visibleControls);
+  }
 
   /// Control settings block display.
-  // _showScreenSettings() {
-  //   bool playing = _videoPlayerController.value.isPlaying;
-  //   if (_visibleSettings! && !playing) {
-  //     /// play
-  //     if (_wasPlaying!) {
-  //       _playAndPauseSwitch();
+  showScreenSettings() {
+    /// Saves if the video was playing
+    /// to play again after leaving the settings menu
+    bool playing = widget.videoPlayerController.value.isPlaying;
 
-  //       /// Hide the control interface
-  //       setState(() => _visibleSettings = false);
-  //     } else {
-  //       /// Hide the control interface
-  //       setState(() => _visibleSettings = false);
-  //       _showAndHideControls(true);
-  //     }
-  //   } else if (!_visibleSettings! && playing) {
-  //     /// pause
-  //     _playAndPauseSwitch();
+    if (visibleSettings) {
+      /// Hide Settings
+      /// Show Controls
+      /// Play Video if was playing
 
-  //     /// Switch to displaying the control interface
-  //     setState(() => _visibleSettings = true);
-  //   } else if (!_visibleSettings!) {
-  //     /// Switch to displaying the control interface
-  //     setState(() => _visibleSettings = true);
-  //     _showAndHideControls(false);
-  //   }
-  // }
+      setState(() => visibleSettings = false);
+      showControls(true);
+
+      if (wasPlaying) {
+        playAndPauseSwitch();
+        wasPlaying = false;
+      }
+    } else if (!visibleSettings) {
+      /// Show Settings
+      /// Hide Controls
+      /// Pause video if was playing
+
+      setState(() => visibleSettings = true);
+      showControls(false);
+
+      if (playing) {
+        playAndPauseSwitch();
+        wasPlaying = playing;
+      }
+    }
+  }
 
   /// Controls whether or not to force image distortion.
-  double _aspectRatioManager(VideoPlayerController controller) {
+  double aspectRatioManager(VideoPlayerController controller) {
     /// Check if there is a predefined AspectRatio
     if (widget.simplePlayerSettings.forceAspectRatio) {
       return widget.simplePlayerSettings.aspectRatio;
@@ -87,256 +168,106 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     }
   }
 
-  /// Controls the display of simple controls.
-  _showAndHideControls(bool show) {
-    // /// Show the control interface
-    // setState(() {
-    //   _visibleControls = show;
-    // });
-  }
-
   /// Controls the video playback speed.
-  _speedSetter(double? speed) async {
-    // setState(() => _speed = speed);
-    // _videoPlayerController.setPlaybackSpeed(speed!);
+  speedSetter(double speedChange) async {
+    setState(() => speed = speedChange);
+    widget.videoPlayerController.setPlaybackSpeed(speed);
   }
 
   /// Checks if the video should be displayed in looping.
-  _autoPlayChecker(bool? autoPlay) {
-    // if (autoPlay!) {
-    //   _animationController.forward();
-    //   _videoPlayerController.play();
-    //   _wasPlaying = true;
-    //   _showAndHideControls(false);
-    // }
-  }
-
-  /// Responsible for sending all data to the environment in full screen.
-  _fullScreenManager() {
-    simpleAplication.hideNavigation(true).then((value) {
-      Timer(const Duration(milliseconds: 50), () {
-        /// Send to FullScreen
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SimplePlayerFullScreen(
-                videoPlayerController: widget.videoPlayerController,
-                // simpleController: widget.simpleController,
-                // simplePlayerSettings: simplePlayerSettings,
-                // simplePlayerState: simplePlayerState,
-              ),
-            )).then((value) {
-          /// Retrieves and inserts the last state of the previous screen
-          _lastState(value);
-        });
-      });
-    });
-
-    // SimplePlayerState simplePlayerState = SimplePlayerState(
-    //     currentSeconds: _currentSeconds,
-    //     totalSeconds: _totalSeconds,
-    //     speed: _speed,
-    //     showTime: _showTime,
-    //     label: _tittle,
-    //     autoPlay: _autoPlay,
-    //     loopMode: _loopMode,
-    //     wasPlaying: _videoPlayerController.value.isPlaying,
-    //     confortMode: _confortMode);
-
-    // if (_videoPlayerController.value.isPlaying) _playAndPauseSwitch();
-
-    // /// LockRotation
-    // double ratio = _videoPlayerController.value.aspectRatio;
-    // simpleAplication.lockAndUnlockScreen(lock: true, aspectRatio: ratio);
-
-    // /// FullScreenActivate
-    // simpleAplication.hideNavigation(true).then((value) {
-    //   Timer(const Duration(milliseconds: 50), () {
-    //     /// Send to FullScreen
-    //     Navigator.push(
-    //         context,
-    //         MaterialPageRoute(
-    //           builder: (context) => SimplePlayerFullScreen(
-    //               simpleController: widget.simpleController,
-    //               simplePlayerSettings: simplePlayerSettings,
-    //               simplePlayerState: simplePlayerState),
-    //         )).then((value) {
-    //       /// Retrieves and inserts the last state of the previous screen
-    //       _lastState(value);
-    //     });
-    //   });
-    // });
-  }
-
-  /// Retrieves and inserts the last state of the previous screen
-  _lastState(SimplePlayerState simplePlayerState) {
-    // bool playing = false;
-    // setState(() {
-    //   _speed = simplePlayerState.speed;
-    //   _tittle = simplePlayerState.label;
-    //   _wasPlaying = simplePlayerState.wasPlaying;
-    //   _confortMode = simplePlayerState.confortMode;
-    //   playing = simplePlayerState.wasPlaying!;
-    // });
-
-    // _jumpTo(simplePlayerState.currentSeconds!);
-    // _speedSetter(simplePlayerState.speed);
-
-    // if (playing) {
-    //   _playAndPauseSwitch();
-    // }
-  }
-
-  ///  Sends playback to the specified point.
-  _jumpTo(double value) {
-    // _videoPlayerController.seekTo(Duration(milliseconds: value.toInt()));
-  }
-
-  ///  Extremely precise control of all animations
-  ///  in conjunction with play and pause of playback.
-  _playAndPauseSwitch({bool pauseButton = false}) {
-    // bool playing = _videoPlayerController.value.isPlaying;
-    // if (playing) {
-    //   /// pause
-    //   if (pauseButton) {
-    //     _wasPlaying = !playing;
-    //   } else {
-    //     _wasPlaying = playing;
-    //   }
-    //   _animationController.reverse();
-    //   _videoPlayerController.pause();
-    // } else {
-    //   /// play
-    //   _wasPlaying = playing;
-    //   _animationController.forward();
-    //   _videoPlayerController.play();
-
-    //   /// Configure a Delay to hide the interface controls
-    //   Timer(const Duration(seconds: 1), () => _showAndHideControls(false));
-    // }
-  }
-
-  /// Treat screen tapping to show or hide simple controllers.
-  _screenTap() {
-    // if (_visibleControls!) {
-    //   _showAndHideControls(false);
-    // } else {
-    //   _showAndHideControls(true);
-    // }
+  autoPlayChecker(bool? autoPlay) {
+    if (autoPlay!) {
+      animationController.forward();
+      widget.videoPlayerController.play();
+      showControls(false);
+    }
   }
 
   /// Responsible for correct initialization of all controllers.
-  _setupControllers(SimplePlayerSettings simplePlayerSettings) {
-    // /// Video controller
-    // _videoPlayerController = simpleAplication.getControler(simplePlayerSettings)
-    //   ..initialize().then(
-    //     (_) {
-    //       setState(() {
-    //         _totalSeconds =
-    //             _videoPlayerController.value.duration.inMilliseconds.toDouble();
-    //         _videoPlayerController.setLooping(_loopMode!);
-    //       });
+  setupControllers() {
+    /// Icons controller
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+      reverseDuration: const Duration(milliseconds: 400),
+    );
 
-    //       /// Methods after settings
-    //       _autoPlayChecker(_autoPlay);
-    //     },
-    //   );
+    /// Update Seconds
+    setState(() {
+      totalSeconds =
+          widget.videoPlayerController.value.duration.inMilliseconds.toDouble();
+    });
 
-    // /// Icons controller
-    // _animationController = AnimationController(
-    //   vsync: this,
-    //   duration: const Duration(milliseconds: 400),
-    //   reverseDuration: const Duration(milliseconds: 400),
-    // );
+    print("loop mode: ${widget.simplePlayerSettings.loopMode}");
+
+    /// Methods after settings
+    widget.videoPlayerController
+        .setLooping(widget.simplePlayerSettings.loopMode);
+    autoPlayChecker(autoPlay);
   }
 
   /// Update the real-time seconds counter on replay.
-  _secondsListener() {
-    // _videoPlayerController.addListener(
-    //   () {
-    //     widget.simpleController.updateController(_videoPlayerController);
-    //     bool playing = _videoPlayerController.value.isPlaying;
-    //     if (_currentSeconds == _totalSeconds && !playing) {
-    //       _showAndHideControls(true);
-    //       _animationController.reverse();
-    //       _jumpTo(0.0);
-    //     }
-    //     setState(() {
-    //       _currentSeconds =
-    //           _videoPlayerController.value.position.inMilliseconds.toDouble();
-    //       _showTime = DateFormatter()
-    //           .currentTime(_videoPlayerController.value.position);
-    //     });
-    //   },
-    // );
-  }
+  secondsListener() {
+    bool loopActive = widget.simplePlayerSettings.loopMode;
 
-  /// Shows or hides the HUB from controller commands.
-  _listenerPlayFromController() {
-    // String changeTime = '';
-    // widget.simpleController.listenPlayAndPause().listen((event) {
-    //   if (changeTime != event) {
-    //     bool playing = _videoPlayerController.value.isPlaying;
-    //     if (playing) {
-    //       _showAndHideControls(false);
-    //     } else {
-    //       _showAndHideControls(true);
-    //     }
-    //     changeTime = event;
-    //   }
-    // });
+    widget.videoPlayerController.addListener(
+      () {
+        widget.simpleController.updateController(widget.videoPlayerController);
+
+        /// Check if the video is over
+        if (currentSeconds == totalSeconds && !loopActive) {
+          showControls(true);
+          animationController.reverse();
+          jumpTo(0.0);
+        }
+
+        setState(() {
+          currentSeconds = widget
+              .videoPlayerController.value.position.inMilliseconds
+              .toDouble();
+          showTime = DateFormatter()
+              .currentTime(widget.videoPlayerController.value.position);
+        });
+      },
+    );
   }
 
   /// Responsible for starting the interface
-  _initializeInterface() {
-    // setState(() {
-    //   simplePlayerSettings = widget.simplePlayerSettings;
-    //   _tittle = widget.simplePlayerSettings.label;
-    //   _autoPlay = widget.simplePlayerSettings.autoPlay!;
-    //   _loopMode = widget.simplePlayerSettings.loopMode!;
-    //   _colorAccent = widget.simplePlayerSettings.colorAccent;
-    // });
-
-    // /// Methods
-    // _setupControllers(simplePlayerSettings);
-    // _secondsListener();
-    // _listenerPlayFromController();
-
-    print('PPX Play em 3 segundos');
-    Timer(Duration(seconds: 3), () {
-      print('PPX Play');
-      widget.videoPlayerController.play();
-
-      // ==============================
-      print('PPX Pause em 1 segundo');
-      Timer(Duration(seconds: 1), () {
-        print('PPX Pause');
-        widget.videoPlayerController.pause();
-      });
+  initializeInterface() async {
+    setState(() {
+      tittle = widget.simplePlayerSettings.label;
+      autoPlay = widget.simplePlayerSettings.autoPlay;
+      colorAccent = widget.simplePlayerSettings.colorAccent;
     });
+
+    //// Methods
+    /// The above code is written in the Dart programming language. It appears to be a comment that is
+    /// indicating the presence of a function called "secondsListener". However, since the code is
+    /// commented out, the function is not being executed or used in the current code.
+    secondsListener();
+    setupControllers();
+    listenerPlayFromController();
   }
 
   @override
   void initState() {
     /// Method responsible for initializing
     /// all methods in the correct order
-    _initializeInterface();
+    initializeInterface();
     super.initState();
   }
 
-  // @override
-  // void dispose() {
-  //   _dismissConstrollers();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    _dismissConstrollers();
+    super.dispose();
+  }
 
   /// Finalize resources
-  // _dismissConstrollers() async {
-  //   _animationController.stop();
-  //   _animationController.dispose();
-  //   _videoPlayerController.removeListener(() {});
-  //   _videoPlayerController.dispose();
-  // }
+  _dismissConstrollers() async {
+    animationController.stop();
+    animationController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -352,160 +283,147 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           children: [
             Center(
               child: AspectRatio(
-                aspectRatio: _aspectRatioManager(widget.videoPlayerController),
-                // aspectRatio: 1 / 1,
+                aspectRatio: aspectRatioManager(widget.videoPlayerController),
                 child: VideoPlayer(
                   widget.videoPlayerController,
                 ),
               ),
             ),
-
             Center(
-              child: IconButton(
-                padding: const EdgeInsets.all(0),
-                icon: const Icon(
-                  Icons.fullscreen,
-                  color: Colors.white,
-                ),
-                onPressed: () => _fullScreenManager(),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: visibleControls
+                    ? GestureDetector(
+                        child: AnimatedContainer(
+                          duration: const Duration(seconds: 1),
+                          key: const ValueKey('a'),
+                          color: confortMode
+                              ? Colors.deepOrange.withOpacity(0.1)
+                              : Colors.black.withOpacity(0.2),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 16),
+                                    child: Text(
+                                      tittle,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        shadows: [
+                                          Shadow(
+                                            blurRadius: 10.0,
+                                            color: Colors.black,
+                                            offset: Offset(3.0, 2.0),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    padding: const EdgeInsets.all(0),
+                                    icon: const Icon(
+                                      Icons.settings_outlined,
+                                      color: Colors.white,
+                                    ),
+                                    onPressed: () {
+                                      showScreenSettings();
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Expanded(
+                                child: Center(
+                                  child: IconButton(
+                                    icon: AnimatedIcon(
+                                      size: 40,
+                                      color: Colors.white,
+                                      icon: AnimatedIcons.play_pause,
+                                      progress: animationController,
+                                    ),
+                                    onPressed: () =>
+                                        playAndPauseSwitch(pauseButton: true),
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 16),
+                                    child: Text(
+                                      showTime,
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                  Expanded(
+                                      child: SliderTheme(
+                                    data: Constants.getSliderThemeData(
+                                        colorAccent: colorAccent),
+                                    child: Slider.adaptive(
+                                      value: currentSeconds!,
+                                      max: totalSeconds!,
+                                      min: 0,
+                                      label: currentSeconds.toString(),
+                                      onChanged: (double value) {
+                                        jumpTo(value);
+                                      },
+                                    ),
+                                  )),
+                                  IconButton(
+                                    padding: const EdgeInsets.all(0),
+                                    icon: const Icon(
+                                      Icons.fullscreen,
+                                      color: Colors.white,
+                                    ),
+                                    onPressed: () => fullScreenManager(),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        onTap: () => screenTap(),
+                      )
+                    : GestureDetector(
+                        child: AnimatedContainer(
+                          duration: const Duration(seconds: 1),
+                          key: const ValueKey('b'),
+                          color: confortMode
+                              ? Colors.deepOrange.withOpacity(0.1)
+                              : Colors.transparent,
+                          height: height,
+                        ),
+                        onTap: () => screenTap(),
+                      ),
               ),
-            )
-            // _videoPlayerController.value.isInitialized
-            //     ? Center(
-            //         child: AnimatedSwitcher(
-            //           duration: const Duration(milliseconds: 200),
-            //           transitionBuilder:
-            //               (Widget child, Animation<double> animation) {
-            //             return FadeTransition(opacity: animation, child: child);
-            //           },
-            //           child: _visibleControls!
-            //               ? GestureDetector(
-            //                   child: AnimatedContainer(
-            //                     duration: const Duration(seconds: 1),
-            //                     key: const ValueKey('a'),
-            //                     color: _confortMode!
-            //                         ? Colors.deepOrange.withOpacity(0.1)
-            //                         : Colors.black.withOpacity(0.2),
-            //                     child: Column(
-            //                       crossAxisAlignment:
-            //                           CrossAxisAlignment.stretch,
-            //                       children: [
-            //                         Row(
-            //                           mainAxisAlignment:
-            //                               MainAxisAlignment.spaceBetween,
-            //                           children: [
-            //                             Padding(
-            //                               padding:
-            //                                   const EdgeInsets.only(left: 16),
-            //                               child: Text(
-            //                                 _tittle!,
-            //                                 style: const TextStyle(
-            //                                   color: Colors.white,
-            //                                   fontSize: 16,
-            //                                   shadows: [
-            //                                     Shadow(
-            //                                       blurRadius: 10.0,
-            //                                       color: Colors.black,
-            //                                       offset: Offset(3.0, 2.0),
-            //                                     ),
-            //                                   ],
-            //                                 ),
-            //                               ),
-            //                             ),
-            //                             IconButton(
-            //                               padding: const EdgeInsets.all(0),
-            //                               icon: const Icon(
-            //                                 Icons.settings_outlined,
-            //                                 color: Colors.white,
-            //                               ),
-            //                               onPressed: () {
-            //                                 _showScreenSettings();
-            //                               },
-            //                             ),
-            //                           ],
-            //                         ),
-            //                         Expanded(
-            //                           child: Center(
-            //                             child: IconButton(
-            //                                 icon: AnimatedIcon(
-            //                                     size: 40,
-            //                                     color: Colors.white,
-            //                                     icon: AnimatedIcons.play_pause,
-            //                                     progress: _animationController),
-            //                                 onPressed: () =>
-            //                                     _playAndPauseSwitch(
-            //                                         pauseButton: true)),
-            //                           ),
-            //                         ),
-            //                         Row(
-            //                           mainAxisSize: MainAxisSize.min,
-            //                           children: [
-            //                             Padding(
-            //                                 padding:
-            //                                     const EdgeInsets.only(left: 16),
-            //                                 child: Text(_showTime!,
-            //                                     style: const TextStyle(
-            //                                         color: Colors.white))),
-            //                             Expanded(
-            //                                 child: SliderTheme(
-            //                               data: constants.getSliderThemeData(
-            //                                   colorAccent: _colorAccent),
-            //                               child: Slider.adaptive(
-            //                                 value: _currentSeconds!,
-            //                                 max: _totalSeconds!,
-            //                                 min: 0,
-            //                                 label: _currentSeconds.toString(),
-            //                                 onChanged: (double value) {
-            //                                   _jumpTo(value);
-            //                                 },
-            //                               ),
-            //                             )),
-            //                             IconButton(
-            //                               padding: const EdgeInsets.all(0),
-            //                               icon: const Icon(
-            //                                 Icons.fullscreen,
-            //                                 color: Colors.white,
-            //                               ),
-            //                               onPressed: () => _fullScreenManager(),
-            //                             ),
-            //                           ],
-            //                         ),
-            //                       ],
-            //                     ),
-            //                   ),
-            //                   onTap: () => _screenTap(),
-            //                 )
-            //               : GestureDetector(
-            //                   child: AnimatedContainer(
-            //                     duration: const Duration(seconds: 1),
-            //                     key: const ValueKey('b'),
-            //                     color: _confortMode!
-            //                         ? Colors.deepOrange.withOpacity(0.1)
-            //                         : Colors.transparent,
-            //                     height: height,
-            //                   ),
-            //                   onTap: () => _screenTap(),
-            //                 ),
-            //         ),
-            //       )
-            //     : const Center(child: CircularProgressIndicator()),
-            // AnimatedSwitcher(
-            //   duration: const Duration(milliseconds: 200),
-            //   transitionBuilder: (Widget child, Animation<double> animation) {
-            //     return FadeTransition(opacity: animation, child: child);
-            //   },
-            //   child: _visibleSettings!
-            //       ? SettingsScreen(
-            //           colorAccent: _colorAccent!,
-            //           speed: _speed!,
-            //           confortModeOn: _confortMode!,
-            //           onExit: () => _showScreenSettings(),
-            //           confortClicked: (value) =>
-            //               setState(() => _confortMode = value),
-            //           speedSelected: (value) => _speedSetter(value),
-            //         )
-            //       : const SizedBox(width: 1, height: 1),
-            // ),
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              child: visibleSettings
+                  ? SettingsScreen(
+                      tittle: tittle,
+                      colorAccent: colorAccent,
+                      speed: speed,
+                      confortModeOn: confortMode,
+                      onExit: () => showScreenSettings(),
+                      speedSelected: (value) => speedSetter(value),
+                      confortMode: (value) =>
+                          setState(() => confortMode = value),
+                    )
+                  : const SizedBox(width: 1, height: 1),
+            ),
           ],
         ),
       ),

@@ -74,8 +74,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   path: url,
                   label: 'Bee',
                   aspectRatio: 16 / 9,
-                  autoPlay: false,
-                  loopMode: true,
+                  autoPlay: true,
+                  loopMode: false,
                   forceAspectRatio: false,
                   colorAccent: Colors.red,
                 ),
@@ -83,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
 
             // Start using the controller.
-            /*  Container(
+            Container(
               margin: const EdgeInsets.all(8.0),
               padding: const EdgeInsets.all(8.0),
               color: Colors.blue.withOpacity(0.1),
@@ -149,7 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               ),
-            ), */
+            ),
           ],
         ),
       ),

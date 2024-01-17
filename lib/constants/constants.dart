@@ -4,7 +4,7 @@ class Constants {
   static const String videoExample =
       'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
 
-  SliderThemeData getSliderThemeData({Color? colorAccent}) {
+  static SliderThemeData getSliderThemeData({Color? colorAccent}) {
     Color accentColor = colorAccent ?? Colors.red;
     return SliderThemeData(
       activeTrackColor: accentColor,

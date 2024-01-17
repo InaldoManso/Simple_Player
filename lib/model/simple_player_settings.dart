@@ -22,7 +22,8 @@ class SimplePlayerSettings {
   });
 
   ///
-  /// ## SimplePlayerSettings properties can be configured in the following ways:
+  /// ## SimplePlayerSettings
+  /// ### Properties can be configured in the following ways:
   ///
   /// ### String? path;
   /// Defines the origin of the file, which can be:
@@ -57,7 +58,6 @@ class SimplePlayerSettings {
   /// ### Color? colorAccent;
   /// Sets the SimplePlayer details color.
   ///
-
   factory SimplePlayerSettings.network(
       {required String path,
       String? label,

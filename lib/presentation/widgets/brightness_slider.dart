@@ -15,7 +15,6 @@ class BrightnessSlider extends StatefulWidget {
 class BbrightnessStateSlider extends State<BrightnessSlider> {
   /// Classes and Packages
   SimpleAplication simpleAplication = SimpleAplication();
-  Constants constants = Constants();
 
   /// Attributes
   double? _brightness = 0.0;
@@ -48,7 +47,7 @@ class BbrightnessStateSlider extends State<BrightnessSlider> {
         ),
         Expanded(
           child: SliderTheme(
-            data: constants.getSliderThemeData(colorAccent: widget.colorAccent),
+            data: Constants.getSliderThemeData(colorAccent: widget.colorAccent),
             child: Slider(
               value: _brightness!,
               max: 1.0,
