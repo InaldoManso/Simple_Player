@@ -19,21 +19,21 @@ class BbrightnessStateSlider extends State<BrightnessSlider> {
   /// Attributes
   double? _brightness = 0.0;
 
-  _brightnessSetter(double brightness) async {
+  brightnessSetter(double brightness) async {
     setState(() => _brightness = brightness);
     ScreenBrightness().setScreenBrightness(brightness);
   }
 
-  _initializeInterface() async {
+  initializeInterface() async {
     double brightness = await ScreenBrightness().current;
 
     /// Methods
-    _brightnessSetter(brightness);
+    brightnessSetter(brightness);
   }
 
   @override
   void initState() {
-    _initializeInterface();
+    initializeInterface();
     super.initState();
   }
 
@@ -55,7 +55,7 @@ class BbrightnessStateSlider extends State<BrightnessSlider> {
               divisions: 20,
               label: simpleAplication.doubleConvert(_brightness!),
               onChanged: (double value) {
-                _brightnessSetter(value);
+                brightnessSetter(value);
               },
             ),
           ),

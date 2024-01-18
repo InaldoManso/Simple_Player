@@ -1,3 +1,9 @@
+## 2.0.0 - Player fluidity 🍃🚀
+
+* FullScreen mode is now much more fluid.
+* Optimized video loading.
+* New Settings PopUp.
+
 ## 1.1.4 - FullScreen adjustments 📺✨
 
 * FullScreen mode now respects the Aspect Ratio of the played video: portrait and landscape.

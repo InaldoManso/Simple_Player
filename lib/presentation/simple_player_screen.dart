@@ -45,11 +45,18 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   double speed = 1.0;
 
   ///  Sends playback to the specified point.
+  /// The jumpTo function seeks the video player controller to a specific time in milliseconds.
+  ///
+  /// Args:
+  ///   value (double): The value parameter is a double representing the time in milliseconds to jump to
+  /// in the video.
   jumpTo(double value) {
     widget.videoPlayerController.seekTo(Duration(milliseconds: value.toInt()));
   }
 
   /// Shows or hides the HUB from controller commands.
+  /// The function `listenerPlayFromController()` listens for play and pause events from a
+  /// `simpleController` and updates the visibility of controls based on the current playback state.
   listenerPlayFromController() {
     String changeTime = '';
     streamSubscription =
@@ -68,9 +75,13 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
 
   ///  Extremely precise control of all animations
   ///  in conjunction with play and pause of playback.
+  /// The function `playAndPauseSwitch` toggles between playing and pausing a video and also controls the
+  /// visibility of interface controls.
+  ///
+  /// Args:
+  ///   pauseButton (bool): The `pauseButton` parameter is a boolean value that indicates whether the
+  /// pause button is currently pressed or not. It is set to `false` by default. Defaults to false
   playAndPauseSwitch({bool pauseButton = false}) {
-    bool playing = widget.videoPlayerController.value.isPlaying;
-
     if (widget.videoPlayerController.value.isPlaying) {
       /// pause
       widget.videoPlayerController.pause();
@@ -91,6 +102,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   /// Responsible for sending all data to the environment in full screen.
+  /// The `fullScreenManager()` function manages the full-screen functionality of a video player in a Dart
+  /// application.
   fullScreenManager() {
     /// LockRotation
     double ratio = widget.videoPlayerController.value.aspectRatio;
@@ -107,13 +120,17 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
               videoPlayerController: widget.videoPlayerController,
               simplePlayerSettings: widget.simplePlayerSettings,
               simpleController: widget.simpleController,
-              simplePlayerState: SimplePlayerState(confortMode: confortMode),
+              simplePlayerState: SimplePlayerState(
+                confortMode: confortMode,
+                showTime: showTime,
+              ),
             ),
           ),
         ).then((value) {
           SimplePlayerState simplePlayerState = value;
           setState(() {
             confortMode = simplePlayerState.confortMode;
+            showTime = simplePlayerState.showTime;
           });
         });
       });
@@ -121,11 +138,14 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   /// Treat screen tapping to show or hide simple controllers.
+  /// The screenTap function toggles the visibility of controls in the UI.
   screenTap() {
     setState(() => visibleControls = !visibleControls);
   }
 
   /// Control settings block display.
+  /// The function `showScreenSettings()` toggles the visibility of the settings menu, hides or shows the
+  /// controls accordingly, and pauses or resumes the video playback based on its previous state.
   showScreenSettings() {
     /// Saves if the video was playing
     /// to play again after leaving the settings menu
@@ -159,6 +179,16 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   /// Controls whether or not to force image distortion.
+  /// The function `aspectRatioManager` returns the aspect ratio of a video player controller, either
+  /// using a predefined aspect ratio or the aspect ratio of the controller itself.
+  ///
+  /// Args:
+  ///   controller (VideoPlayerController): The `controller` parameter is an instance of the
+  /// `VideoPlayerController` class. It is used to control the playback of a video and retrieve
+  /// information about the video, such as its aspect ratio.
+  ///
+  /// Returns:
+  ///   The method `aspectRatioManager` returns a double value.
   double aspectRatioManager(VideoPlayerController controller) {
     /// Check if there is a predefined AspectRatio
     if (widget.simplePlayerSettings.forceAspectRatio) {
@@ -169,12 +199,24 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   /// Controls the video playback speed.
+  /// The function `speedSetter` updates the playback speed of a video player and updates the state of the
+  /// widget.
+  ///
+  /// Args:
+  ///   speedChange (double): The speedChange parameter is a double value that represents the new playback
+  /// speed that you want to set for the video player.
   speedSetter(double speedChange) async {
     setState(() => speed = speedChange);
     widget.videoPlayerController.setPlaybackSpeed(speed);
   }
 
   /// Checks if the video should be displayed in looping.
+  /// The function `autoPlayChecker` checks if `autoPlay` is true, and if so, it forwards the animation
+  /// controller, plays the video player controller, and hides the controls.
+  ///
+  /// Args:
+  ///   autoPlay (bool): The autoPlay parameter is a boolean value that indicates whether the video should
+  /// automatically start playing or not.
   autoPlayChecker(bool? autoPlay) {
     if (autoPlay!) {
       animationController.forward();
@@ -184,6 +226,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   /// Responsible for correct initialization of all controllers.
+  /// The function `setupControllers()` sets up the animation controller, updates the total seconds of the
+  /// video, sets the loop mode of the video player controller, and checks if auto play is enabled.
   setupControllers() {
     /// Icons controller
     animationController = AnimationController(
@@ -207,6 +251,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   }
 
   /// Update the real-time seconds counter on replay.
+  /// The `secondsListener` function updates the current playback time and checks if the video is over,
+  /// based on the `videoPlayerController` and `loopActive` settings.
   secondsListener() {
     bool loopActive = widget.simplePlayerSettings.loopMode;
 
@@ -263,7 +309,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     super.dispose();
   }
 
-  /// Finalize resources
+  /// The function `_dismissControllers()` stops and disposes an animation controller.
   _dismissConstrollers() async {
     animationController.stop();
     animationController.dispose();
@@ -271,6 +317,9 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
 
   @override
   Widget build(BuildContext context) {
+    /// The above code is retrieving the height and width of the device's screen using the `MediaQuery`
+    /// class in Dart. It is storing the height in the `height` variable and the width in the `width`
+    /// variable.
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
 
@@ -369,8 +418,8 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
                                     data: Constants.getSliderThemeData(
                                         colorAccent: colorAccent),
                                     child: Slider.adaptive(
-                                      value: currentSeconds!,
-                                      max: totalSeconds!,
+                                      value: currentSeconds,
+                                      max: totalSeconds,
                                       min: 0,
                                       label: currentSeconds.toString(),
                                       onChanged: (double value) {

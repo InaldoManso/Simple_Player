@@ -28,15 +28,26 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   /// ReturnValue
+  /// The function `onExit` calls the `onExit` function passed as a parameter to the widget.
   void onExit() => widget.onExit!();
+
+  /// The function `_confortCallBack` calls the `confortMode` function with a boolean value as an
+  /// argument.
+  ///
+  /// Args:
+  ///   value (bool): The value parameter is a boolean value that represents the state of the comfort
+  /// mode. It is passed as an argument to the _confortCallBack function.
   void _confortCallBack(bool value) => widget.confortMode(value);
+
+  /// The function `_speedCallBack` calls the `speedSelected` function with a double value as an
+  /// argument.
+  ///
+  /// Args:
+  ///   value (double): The value parameter is a double value that represents the selected speed.
   void _speedCallBack(double value) => widget.speedSelected(value);
 
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
-
     return GestureDetector(
       onTap: onExit,
       child: Container(

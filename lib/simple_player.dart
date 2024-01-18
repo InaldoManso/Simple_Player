@@ -71,6 +71,13 @@ class _SimplePlayerState extends State<SimplePlayer> {
   late VideoPlayerController videoPlayerController;
   bool loaded = false;
 
+  /// The function `getControler` initializes a video player controller based on the type of video
+  /// specified in the `simplePlayerSettings` parameter.
+  ///
+  /// Args:
+  ///   simplePlayerSettings (SimplePlayerSettings): The `simplePlayerSettings` parameter is an object of
+  /// type `SimplePlayerSettings`. It contains information about the type of video player and the path to
+  /// the video file.
   getControler(SimplePlayerSettings simplePlayerSettings) async {
     switch (simplePlayerSettings.type) {
       case 'network':
