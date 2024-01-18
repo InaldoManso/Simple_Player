@@ -19,6 +19,12 @@ class BbrightnessStateSlider extends State<BrightnessSlider> {
   /// Attributes
   double? _brightness = 0.0;
 
+  /// The function sets the screen brightness to the specified value and updates the state.
+  ///
+  /// Args:
+  ///   brightness (double): The brightness parameter is a double value that represents the desired
+  /// brightness level. It should be a value between 0.0 and 1.0, where 0.0 represents the lowest
+  /// brightness level and 1.0 represents the highest brightness level.
   brightnessSetter(double brightness) async {
     setState(() => _brightness = brightness);
     ScreenBrightness().setScreenBrightness(brightness);
