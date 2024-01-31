@@ -242,8 +242,6 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           widget.videoPlayerController.value.duration.inMilliseconds.toDouble();
     });
 
-    print("loop mode: ${widget.simplePlayerSettings.loopMode}");
-
     /// Methods after settings
     widget.videoPlayerController
         .setLooping(widget.simplePlayerSettings.loopMode);
