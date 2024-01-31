@@ -1,3 +1,7 @@
+## 2.0.1 - Issues alerts fix 📺❗
+
+* Adjust the play button and pause in fullscreen.
+
 ## 2.0.1 - Issues alerts fix 🐞❗
 
 * Issues alerts fix.

@@ -33,6 +33,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
 
   /// Attributes
   late AnimationController animationController;
+  late VideoPlayerController localController;
   Color colorAccent = Colors.red;
   bool visibleSettings = false;
   bool visibleControls = true;
@@ -40,6 +41,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   bool wasPlaying = false;
   bool autoPlay = false;
   bool loopMode = false;
+  bool disposed = false;
   String showTime = '00:00';
   String tittle = '';
   double currentSeconds = 0.0;
@@ -159,6 +161,12 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
       reverseDuration: const Duration(milliseconds: 400),
     );
 
+    if (widget.videoPlayerController.value.isPlaying) {
+      animationController.forward();
+    } else {
+      animationController.reverse();
+    }
+
     /// Update Seconds
     setState(() {
       totalSeconds =
@@ -239,23 +247,26 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   secondsListener() {
     widget.videoPlayerController.addListener(
       () {
-        widget.simpleController.updateController(widget.videoPlayerController);
+        if (!disposed) {
+          widget.simpleController
+              .updateController(widget.videoPlayerController);
 
-        /// Check if the video is over
-        bool playing = widget.videoPlayerController.value.isPlaying;
-        if (currentSeconds == totalSeconds && !playing) {
-          showControls(true);
-          animationController.reverse();
-          jumpTo(0.0);
+          /// Check if the video is over
+          bool playing = widget.videoPlayerController.value.isPlaying;
+          if (currentSeconds == totalSeconds && !playing) {
+            showControls(true);
+            animationController.reverse();
+            jumpTo(0.0);
+          }
+
+          setState(() {
+            currentSeconds = widget
+                .videoPlayerController.value.position.inMilliseconds
+                .toDouble();
+            showTime = DateFormatter()
+                .currentTime(widget.videoPlayerController.value.position);
+          });
         }
-
-        setState(() {
-          currentSeconds = widget
-              .videoPlayerController.value.position.inMilliseconds
-              .toDouble();
-          showTime = DateFormatter()
-              .currentTime(widget.videoPlayerController.value.position);
-        });
       },
     );
   }
@@ -294,6 +305,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   /// Finalize resources
   /// The function `_dismissControllers()` stops and disposes an animation controller.
   _dismissConstrollers() async {
+    disposed = true;
     animationController.stop();
     animationController.dispose();
   }
