@@ -136,6 +136,12 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
             confortMode = simplePlayerState.confortMode;
             showTime = simplePlayerState.showTime;
           });
+
+          if (widget.videoPlayerController.value.isPlaying) {
+            animationController.forward();
+          } else {
+            animationController.reverse();
+          }
         });
       });
     });

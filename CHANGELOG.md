@@ -1,9 +1,16 @@
-## 2.0.3 - Correção de alertas de problemas e nova função: delete() ✨📺❗✅
+## 2.1.0 - Correção de alertas de problemas e nova função: delete() ✨📺✅
 
 * Adjustment of the play and pause interface that was not hidden after playing the video
 * Playback discard adjustment that was not working correctly
-* Adjust the play button and pause in fullscreen.
 * Added .delete() method. (dipose)
+
+## 2.0.2 - Issues alerts fix 📺❗
+
+* Adjust the play button and pause in fullscreen.
+
+## 2.0.1 - Issues alerts fix 🐞❗
+
+* Issues alerts fix.
 
 ## 2.0.0 - Player fluidity 🍃🚀
 

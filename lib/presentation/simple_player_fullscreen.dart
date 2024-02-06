@@ -33,6 +33,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
 
   /// Attributes
   late AnimationController animationController;
+  late VideoPlayerController localController;
   Color colorAccent = Colors.red;
   bool visibleSettings = false;
   bool visibleControls = true;
