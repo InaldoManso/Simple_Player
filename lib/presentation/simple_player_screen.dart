@@ -38,6 +38,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
   bool confortMode = false;
   bool wasPlaying = false;
   bool autoPlay = false;
+  bool disposed = false;
   String showTime = '00:00';
   String tittle = '';
   double currentSeconds = 0.0;
@@ -61,14 +62,16 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
     String changeTime = '';
     streamSubscription =
         widget.simpleController.listenPlayAndPause().listen((event) {
-      if (changeTime != event) {
-        bool playing = widget.videoPlayerController.value.isPlaying;
-        if (playing) {
-          showControls(false);
-        } else {
-          showControls(true);
+      if (!disposed) {
+        if (changeTime != event) {
+          bool playing = widget.videoPlayerController.value.isPlaying;
+          if (playing) {
+            showControls(false);
+          } else {
+            showControls(true);
+          }
+          changeTime = event;
         }
-        changeTime = event;
       }
     });
   }
@@ -128,6 +131,7 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           ),
         ).then((value) {
           SimplePlayerState simplePlayerState = value;
+          checkIfVideoIsPlaying();
           setState(() {
             confortMode = simplePlayerState.confortMode;
             showTime = simplePlayerState.showTime;
@@ -242,8 +246,6 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
           widget.videoPlayerController.value.duration.inMilliseconds.toDouble();
     });
 
-    print("loop mode: ${widget.simplePlayerSettings.loopMode}");
-
     /// Methods after settings
     widget.videoPlayerController
         .setLooping(widget.simplePlayerSettings.loopMode);
@@ -258,24 +260,35 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
 
     widget.videoPlayerController.addListener(
       () {
-        widget.simpleController.updateController(widget.videoPlayerController);
+        if (!disposed) {
+          widget.simpleController
+              .updateController(widget.videoPlayerController);
 
-        /// Check if the video is over
-        if (currentSeconds == totalSeconds && !loopActive) {
-          showControls(true);
-          animationController.reverse();
-          jumpTo(0.0);
+          /// Check if the video is over
+          if (currentSeconds == totalSeconds && !loopActive) {
+            showControls(true);
+            animationController.reverse();
+            jumpTo(0.0);
+          }
+
+          setState(() {
+            currentSeconds = widget
+                .videoPlayerController.value.position.inMilliseconds
+                .toDouble();
+            showTime = DateFormatter()
+                .currentTime(widget.videoPlayerController.value.position);
+          });
         }
-
-        setState(() {
-          currentSeconds = widget
-              .videoPlayerController.value.position.inMilliseconds
-              .toDouble();
-          showTime = DateFormatter()
-              .currentTime(widget.videoPlayerController.value.position);
-        });
       },
     );
+  }
+
+  /// The function checks if a video is currently playing and performs certain actions if it is.
+  checkIfVideoIsPlaying() {
+    if (widget.videoPlayerController.value.isPlaying) {
+      showControls(false);
+      animationController.forward();
+    }
   }
 
   /// Responsible for starting the interface
@@ -305,12 +318,13 @@ class _SimplePlayerScrrenState extends State<SimplePlayerScrren>
 
   @override
   void dispose() {
-    _dismissConstrollers();
+    disposed = true;
+    dismissConstrollers();
     super.dispose();
   }
 
   /// The function `_dismissControllers()` stops and disposes an animation controller.
-  _dismissConstrollers() async {
+  dismissConstrollers() async {
     animationController.stop();
     animationController.dispose();
   }

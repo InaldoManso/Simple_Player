@@ -40,6 +40,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   bool wasPlaying = false;
   bool autoPlay = false;
   bool loopMode = false;
+  bool disposed = false;
   String showTime = '00:00';
   String tittle = '';
   double currentSeconds = 0.0;
@@ -117,14 +118,16 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   listenerPlayFromController() {
     String changeTime = '';
     widget.simpleController.listenPlayAndPause().listen((event) {
-      if (changeTime != event) {
-        bool playing = widget.videoPlayerController.value.isPlaying;
-        if (playing) {
-          showControls(false);
-        } else {
-          showControls(true);
+      if (!disposed) {
+        if (changeTime != event) {
+          bool playing = widget.videoPlayerController.value.isPlaying;
+          if (playing) {
+            showControls(false);
+          } else {
+            showControls(true);
+          }
+          changeTime = event;
         }
-        changeTime = event;
       }
     });
   }
@@ -239,25 +242,36 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
   secondsListener() {
     widget.videoPlayerController.addListener(
       () {
-        widget.simpleController.updateController(widget.videoPlayerController);
+        if (!disposed) {
+          widget.simpleController
+              .updateController(widget.videoPlayerController);
 
-        /// Check if the video is over
-        bool playing = widget.videoPlayerController.value.isPlaying;
-        if (currentSeconds == totalSeconds && !playing) {
-          showControls(true);
-          animationController.reverse();
-          jumpTo(0.0);
+          /// Check if the video is over
+          bool playing = widget.videoPlayerController.value.isPlaying;
+          if (currentSeconds == totalSeconds && !playing) {
+            showControls(true);
+            animationController.reverse();
+            jumpTo(0.0);
+          }
+
+          setState(() {
+            currentSeconds = widget
+                .videoPlayerController.value.position.inMilliseconds
+                .toDouble();
+            showTime = DateFormatter()
+                .currentTime(widget.videoPlayerController.value.position);
+          });
         }
-
-        setState(() {
-          currentSeconds = widget
-              .videoPlayerController.value.position.inMilliseconds
-              .toDouble();
-          showTime = DateFormatter()
-              .currentTime(widget.videoPlayerController.value.position);
-        });
       },
     );
+  }
+
+  /// The function checks if a video is currently playing and performs certain actions if it is.
+  checkIfVideoIsPlaying() {
+    if (widget.videoPlayerController.value.isPlaying) {
+      showControls(false);
+      animationController.forward();
+    }
   }
 
   /// Responsible for starting the interface
@@ -275,6 +289,7 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
     setupControllers();
     secondsListener();
     listenerPlayFromController();
+    checkIfVideoIsPlaying();
   }
 
   @override
@@ -287,13 +302,14 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
 
   @override
   void dispose() {
-    _dismissConstrollers();
+    disposed = true;
+    dismissConstrollers();
     super.dispose();
   }
 
   /// Finalize resources
   /// The function `_dismissControllers()` stops and disposes an animation controller.
-  _dismissConstrollers() async {
+  dismissConstrollers() async {
     animationController.stop();
     animationController.dispose();
   }
@@ -378,13 +394,14 @@ class _SimplePlayerFullScreenState extends State<SimplePlayerFullScreen>
                                 Expanded(
                                   child: Center(
                                     child: IconButton(
-                                        icon: AnimatedIcon(
-                                            size: 40,
-                                            color: Colors.white,
-                                            icon: AnimatedIcons.play_pause,
-                                            progress: animationController),
-                                        onPressed: () => playAndPauseSwitch(
-                                            pauseButton: true)),
+                                      icon: AnimatedIcon(
+                                          size: 40,
+                                          color: Colors.white,
+                                          icon: AnimatedIcons.play_pause,
+                                          progress: animationController),
+                                      onPressed: () =>
+                                          playAndPauseSwitch(pauseButton: true),
+                                    ),
                                   ),
                                 ),
                                 Row(

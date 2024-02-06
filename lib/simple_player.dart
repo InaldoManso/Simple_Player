@@ -47,7 +47,6 @@ class SimplePlayer extends StatefulWidget {
   /// )
   /// ```
   ///
-  /// {@tool snippet}
   ///
   ///The player should behave like this:
   ///
@@ -105,6 +104,12 @@ class _SimplePlayerState extends State<SimplePlayer> {
   void initState() {
     getControler(widget.simplePlayerSettings);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    videoPlayerController.dispose();
+    super.dispose();
   }
 
   @override

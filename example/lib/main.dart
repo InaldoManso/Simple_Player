@@ -147,6 +147,28 @@ class _MyHomePageState extends State<MyHomePage> {
                       Text(stremPosition)
                     ],
                   ),
+
+                  const Divider(),
+                  const Text(
+                    '.delete() This method does not need to be called in normal cases, '
+                    'SimplePlayer already has an AutoDispose to facilitate its correct use.',
+                    style: TextStyle(color: Colors.orange),
+                    textAlign: TextAlign.center,
+                  ),
+                  TextButton.icon(
+                    label: const Text(
+                      "Dispose SimpleController",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    icon: const Icon(
+                      Icons.delete_forever_outlined,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      // Does not require setState to play.
+                      simpleController.delete();
+                    },
+                  ),
                 ],
               ),
             ),

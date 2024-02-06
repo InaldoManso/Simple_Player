@@ -9,17 +9,24 @@ class SimpleController extends ChangeNotifier {
 
   SimpleController();
 
-  /// ▶️ Start playing the video
+  /// ## ▶️ Start playing the video
   void play() {
     _changePlay = DateTime.now().toString();
     videoPlayerController.play();
     notifyListeners();
   }
 
-  /// ⏸️ Pause video playback
+  /// ## ⏸️ Pause video playback
   void pause() {
     _changePlay = DateTime.now().toString();
     videoPlayerController.pause();
+    notifyListeners();
+  }
+
+  /// ## ⛔ By disposing of the controller <br>
+  /// ⚠️ This method does not need to be called in normal cases, SimplePlayer already has an AutoDispose to facilitate its correct use.
+  void delete() {
+    videoPlayerController.dispose();
     notifyListeners();
   }
 

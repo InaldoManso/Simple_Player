@@ -56,6 +56,10 @@ simpleController.pause()
 // Get current position (return Duration)
  simpleController.position;
 
+// By disposing of the controller
+// This method does not need to be called in normal cases, SimplePlayer already has an AutoDispose to facilitate its correct use.
+ simpleController.delete()
+
 // Hear player position (return Duration)
 simpleController.listenPosition().listen((event) {
     Duration stremPosition = event.toString();
