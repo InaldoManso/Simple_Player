@@ -1,53 +1,72 @@
 import 'package:flutter/material.dart';
 
+/// Holds every visual/behavioural option of a [SimplePlayer] instance.
+///
+/// Prefer the [SimplePlayerSettings.network] / [SimplePlayerSettings.assets]
+/// factories over the raw constructor.
 class SimplePlayerSettings {
-  String type;
-  String path;
-  String label;
-  double aspectRatio;
-  bool autoPlay;
-  bool loopMode;
-  bool forceAspectRatio;
-  Color colorAccent;
+  final String type;
+  final String path;
+  final String label;
+  final double aspectRatio;
+  final bool autoPlay;
+  final bool loopMode;
+  final bool expand;
+  final Color colorAccent;
 
-  SimplePlayerSettings({
+  /// How the video frame is scaled inside the player box (inline mode).
+  final BoxFit fit;
+
+  /// How the video frame is scaled inside the player box (full screen mode).
+  final BoxFit fullScreenFit;
+
+  const SimplePlayerSettings({
     required this.type,
     required this.path,
     required this.label,
     required this.aspectRatio,
     required this.autoPlay,
     required this.loopMode,
-    required this.forceAspectRatio,
     required this.colorAccent,
+    this.fit = BoxFit.contain,
+    this.fullScreenFit = BoxFit.contain,
+    this.expand = false,
   });
 
   ///
   /// ## SimplePlayerSettings
   /// ### Properties can be configured in the following ways:
   ///
-  /// ### String? path;
+  /// ### String path;
   /// Defines the origin of the file, which can be:
   /// SimplePlayerSettings.network (Video URL)
   /// SimplePlayerSettings.assets (Path of a video file)
   ///
   /// ### String? label;
-  /// Sets the title displayed at the top dropdown of the video.
+  /// Sets the title displayed at the top of the video.
   ///
   /// ### double? aspectRatio; (default 16:9)
-  /// Sets SimplePlayer's aspect ratio, this can let black embroideries on the video without distorting the image.
+  /// Sets the aspect ratio of the **player box** — the area the widget occupies
+  /// on your layout. Ignored when `expand: true`.
   ///
-  /// ### bool? forceAspectRatio
-  /// True case: Forces the video to fit the Player's aspect ratio, this may distort the image.
-  /// #### Examples:
-  /// - aspectRatio: 1 / 1,
-  /// - forceAspectRatio: false
+  /// ### bool? expand; (default false)
+  /// If true the player fills whatever box its parent gives it instead of
+  /// forcing [aspectRatio]. Useful to let the player follow a container that
+  /// has a proportion of its own.
   ///
-  /// ![bee](https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/bee_ratio_false.png)
+  /// ### BoxFit? fit; (default BoxFit.contain)
+  /// Decides how the video frame is scaled inside the player box:
+  /// - [BoxFit.contain]: the whole video is visible, black bars may appear.
+  /// - [BoxFit.cover]: the box is fully painted, the video is cropped.
+  /// - [BoxFit.fill]: the video is stretched to the box (distorts the image).
   ///
-  /// - aspectRatio: 1 / 1,
-  /// - forceAspectRatio: true
+  /// The player controls (play/pause, timeline, full screen button) live on a
+  /// separate layer and are **never** clipped or distorted by this option.
   ///
-  /// ![bee](https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/bee_ratio_true.png)
+  /// ### BoxFit? fullScreenFit; (default BoxFit.contain)
+  /// Same as [fit], but applied while the player is in full screen. This lets
+  /// you use, for instance, `fit: BoxFit.cover` on a feed and
+  /// `fullScreenFit: BoxFit.contain` once the video is opened.
   ///
   /// ### bool? autoPlay;
   /// If true: as soon as the Player is built the video will be played automatically.
@@ -58,41 +77,54 @@ class SimplePlayerSettings {
   /// ### Color? colorAccent;
   /// Sets the SimplePlayer details color.
   ///
-  factory SimplePlayerSettings.network(
-      {required String path,
-      String? label,
-      double? aspectRatio,
-      bool? autoPlay,
-      bool? loopMode,
-      bool? forceAspectRatio,
-      Color? colorAccent}) {
+  factory SimplePlayerSettings.network({
+    required String path,
+    String? label,
+    double? aspectRatio,
+    bool? autoPlay,
+    bool? loopMode,
+    bool? expand,
+    BoxFit? fit,
+    BoxFit? fullScreenFit,
+    Color? colorAccent,
+  }) {
     return SimplePlayerSettings(
-        type: 'network',
-        path: path,
-        label: label ?? '',
-        aspectRatio: aspectRatio ?? 16 / 9,
-        autoPlay: autoPlay ?? false,
-        loopMode: loopMode ?? false,
-        forceAspectRatio: forceAspectRatio ?? false,
-        colorAccent: colorAccent ?? Colors.red);
+      type: 'network',
+      path: path,
+      label: label ?? '',
+      aspectRatio: aspectRatio ?? 16 / 9,
+      autoPlay: autoPlay ?? false,
+      loopMode: loopMode ?? false,
+      expand: expand ?? false,
+      fit: fit ?? BoxFit.contain,
+      fullScreenFit: fullScreenFit ?? BoxFit.contain,
+      colorAccent: colorAccent ?? Colors.red,
+    );
   }
 
-  factory SimplePlayerSettings.assets(
-      {required String path,
-      String? label,
-      double? aspectRatio,
-      bool? autoPlay,
-      bool? loopMode,
-      bool? forceAspectRatio,
-      Color? colorAccent}) {
+  /// See [SimplePlayerSettings.network] for the full property reference.
+  factory SimplePlayerSettings.assets({
+    required String path,
+    String? label,
+    double? aspectRatio,
+    bool? autoPlay,
+    bool? loopMode,
+    bool? expand,
+    BoxFit? fit,
+    BoxFit? fullScreenFit,
+    Color? colorAccent,
+  }) {
     return SimplePlayerSettings(
-        type: 'assets',
-        path: path,
-        label: label ?? '',
-        aspectRatio: aspectRatio ?? 16 / 9,
-        autoPlay: autoPlay ?? false,
-        loopMode: loopMode ?? false,
-        forceAspectRatio: forceAspectRatio ?? false,
-        colorAccent: colorAccent ?? Colors.red);
+      type: 'assets',
+      path: path,
+      label: label ?? '',
+      aspectRatio: aspectRatio ?? 16 / 9,
+      autoPlay: autoPlay ?? false,
+      loopMode: loopMode ?? false,
+      expand: expand ?? false,
+      fit: fit ?? BoxFit.contain,
+      fullScreenFit: fullScreenFit ?? BoxFit.contain,
+      colorAccent: colorAccent ?? Colors.red,
+    );
   }
 }

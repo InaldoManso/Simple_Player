@@ -1,5 +1,5 @@
-import 'package:simple_player/simple_player.dart';
 import 'package:flutter/material.dart';
+import 'package:simple_player/simple_player.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -9,7 +9,7 @@ void main() {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({super.key});
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
@@ -24,8 +24,12 @@ class _MyHomePageState extends State<MyHomePage> {
   String currentPosition = '...';
   String stremPosition = '...';
 
+  // Drives the BoxFit demo below.
+  BoxFit fit = BoxFit.cover;
+  BoxFit fullScreenFit = BoxFit.contain;
+
   // This is where the lsitener for the decorator of the video playback seconds starts.
-  _initListener() {
+  void _initListener() {
     simpleController.listenPosition().listen((event) {
       // Updated seconds in the interface.
       // Requires setState to update seconds counter.
@@ -50,6 +54,40 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  // Small helper to switch a BoxFit at runtime.
+  Widget _fitSelector({
+    required String label,
+    required BoxFit value,
+    required ValueChanged<BoxFit> onChanged,
+  }) {
+    const List<BoxFit> options = [
+      BoxFit.contain,
+      BoxFit.cover,
+      BoxFit.fill,
+      BoxFit.fitWidth,
+      BoxFit.fitHeight,
+    ];
+
+    return Row(
+      children: [
+        Expanded(child: Text(label)),
+        DropdownButton<BoxFit>(
+          value: value,
+          items: [
+            for (final BoxFit option in options)
+              DropdownMenuItem<BoxFit>(
+                value: option,
+                child: Text(option.name),
+              ),
+          ],
+          onChanged: (BoxFit? selected) {
+            if (selected != null) onChanged(selected);
+          },
+        ),
+      ],
+    );
+  }
+
   // Here a basic interface will be built,
   // with the player and its simple controls,
   // and also the use of the player through
@@ -65,6 +103,10 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             // Player wrapped in a padding.
+            //
+            // The player box is a 1:1 square while the video is 16:9, so with
+            // `fit: BoxFit.cover` the video is cropped to fill the square and
+            // the controls stay fully visible on top of it.
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: SimplePlayer(
@@ -73,12 +115,42 @@ class _MyHomePageState extends State<MyHomePage> {
                   // Only the path is required, all other parameters are optional
                   path: url,
                   label: 'Bee',
-                  aspectRatio: 16 / 9,
+                  aspectRatio: 1 / 1,
                   autoPlay: true,
                   loopMode: false,
-                  forceAspectRatio: false,
+                  fit: fit,
+                  fullScreenFit: fullScreenFit,
                   colorAccent: Colors.red,
                 ),
+              ),
+            ),
+
+            // BoxFit playground.
+            Container(
+              margin: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
+              color: Colors.green.withValues(alpha: 0.1),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'BoxFit',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.green),
+                  ),
+                  const Divider(thickness: 2),
+                  _fitSelector(
+                    label: 'fit (inline)',
+                    value: fit,
+                    onChanged: (value) => setState(() => fit = value),
+                  ),
+                  _fitSelector(
+                    label: 'fullScreenFit',
+                    value: fullScreenFit,
+                    onChanged: (value) =>
+                        setState(() => fullScreenFit = value),
+                  ),
+                ],
               ),
             ),
 
@@ -86,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Container(
               margin: const EdgeInsets.all(8.0),
               padding: const EdgeInsets.all(8.0),
-              color: Colors.blue.withOpacity(0.1),
+              color: Colors.blue.withValues(alpha: 0.1),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -148,6 +220,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   ),
 
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      for (final double rate in <double>[0.5, 1.0, 1.5, 2.0])
+                        TextButton(
+                          onPressed: () => simpleController.setSpeed(rate),
+                          child: Text('${rate}x'),
+                        ),
+                    ],
+                  ),
                   const Divider(),
                   const Text(
                     '.delete() This method does not need to be called in normal cases, '

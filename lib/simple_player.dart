@@ -1,12 +1,13 @@
-library simple_player;
+library;
 
 /// Packages
+import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
+
 import 'package:simple_player/aplication/simple_controller.dart';
 import 'package:simple_player/constants/constants.dart';
-import 'package:simple_player/presentation/simple_player_screen.dart';
 import 'package:simple_player/model/simple_player_settings.dart';
-import 'package:video_player/video_player.dart';
-import 'package:flutter/material.dart';
+import 'package:simple_player/presentation/simple_player_screen.dart';
 
 /// Resources
 export 'aplication/simple_controller.dart';
@@ -41,7 +42,8 @@ class SimplePlayer extends StatefulWidget {
   ///     aspectRatio: 16 / 9,
   ///     autoPlay: false,
   ///     loopMode: true,
-  ///     forceAspectRatio: false,
+  ///     fit: BoxFit.cover,
+  ///     fullScreenFit: BoxFit.contain,
   ///     colorAccent: Colors.red,
   ///   ),
   /// )
@@ -50,16 +52,16 @@ class SimplePlayer extends StatefulWidget {
   ///
   ///The player should behave like this:
   ///
-  /// ![bee](https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/player.png)
+  /// ![SimplePlayer](https://raw.githubusercontent.com/InaldoManso/Simple_Player/main/lib/assets/player_inline.jpg)
   ///
   ///Keep an eye out for examples. 🕶️
   ///Good coding! 😎💙
   ///
   const SimplePlayer({
-    Key? key,
+    super.key,
     required this.simpleController,
     required this.simplePlayerSettings,
-  }) : super(key: key);
+  });
 
   @override
   State<SimplePlayer> createState() => _SimplePlayerState();
@@ -67,70 +69,94 @@ class SimplePlayer extends StatefulWidget {
 
 class _SimplePlayerState extends State<SimplePlayer> {
   // Attributes
-  late VideoPlayerController videoPlayerController;
+  VideoPlayerController? videoPlayerController;
   bool loaded = false;
+  Object? error;
 
-  /// The function `getControler` initializes a video player controller based on the type of video
-  /// specified in the `simplePlayerSettings` parameter.
-  ///
-  /// Args:
-  ///   simplePlayerSettings (SimplePlayerSettings): The `simplePlayerSettings` parameter is an object of
-  /// type `SimplePlayerSettings`. It contains information about the type of video player and the path to
-  /// the video file.
-  getControler(SimplePlayerSettings simplePlayerSettings) async {
+  /// Builds the [VideoPlayerController] that matches the configured source and
+  /// waits for it to be ready to play.
+  Future<void> getControler(SimplePlayerSettings simplePlayerSettings) async {
+    final VideoPlayerController controller;
+
     switch (simplePlayerSettings.type) {
-      case 'network':
-        videoPlayerController = VideoPlayerController.networkUrl(
-            Uri.parse(simplePlayerSettings.path));
-        break;
-
       case 'assets':
-        videoPlayerController =
-            VideoPlayerController.asset(simplePlayerSettings.path);
-        break;
-
+        controller = VideoPlayerController.asset(simplePlayerSettings.path);
+      case 'network':
+        controller = VideoPlayerController.networkUrl(
+          Uri.parse(simplePlayerSettings.path),
+        );
       default:
-        videoPlayerController =
-            VideoPlayerController.networkUrl(Uri.parse(Constants.videoExample));
-        break;
+        controller = VideoPlayerController.networkUrl(
+          Uri.parse(Constants.videoExample),
+        );
     }
 
+    videoPlayerController = controller;
+
     // Ready to play
-    await videoPlayerController.initialize();
+    try {
+      await controller.initialize();
+    } catch (exception) {
+      // A dead URL, a missing asset or an unavailable platform implementation
+      // must not blow up the host app nor spin forever.
+      debugPrint('SimplePlayer could not open "${simplePlayerSettings.path}": '
+          '$exception');
+      if (!mounted) return;
+      setState(() => error = exception);
+      return;
+    }
+
+    if (!mounted) return;
+
+    /// Publish the controller before the first frame so the public
+    /// SimpleController API is usable as soon as the player is up.
+    widget.simpleController.updateController(controller);
+
+    /// Playback options are applied once, here, so entering full screen does
+    /// not retrigger autoPlay.
+    await controller.setLooping(simplePlayerSettings.loopMode);
+    if (simplePlayerSettings.autoPlay) await controller.play();
+
+    if (!mounted) return;
     setState(() => loaded = true);
   }
 
   @override
   void initState() {
-    getControler(widget.simplePlayerSettings);
     super.initState();
+    getControler(widget.simplePlayerSettings);
   }
 
   @override
   void dispose() {
-    videoPlayerController.dispose();
+    videoPlayerController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (loaded) {
-      return SimplePlayerScrren(
-        videoPlayerController: videoPlayerController,
+    final SimplePlayerSettings settings = widget.simplePlayerSettings;
+
+    if (loaded && videoPlayerController != null) {
+      return SimplePlayerScreen(
+        videoPlayerController: videoPlayerController!,
         simpleController: widget.simpleController,
-        simplePlayerSettings: widget.simplePlayerSettings,
-      );
-    } else {
-      return AspectRatio(
-        aspectRatio: widget.simplePlayerSettings.aspectRatio,
-        child: Container(
-          color: Colors.black,
-          alignment: Alignment.center,
-          child: CircularProgressIndicator(
-            color: widget.simplePlayerSettings.colorAccent,
-          ),
-        ),
+        simplePlayerSettings: settings,
       );
     }
+
+    final Widget placeholder = ColoredBox(
+      color: Colors.black,
+      child: Center(
+        child: error != null
+            ? Icon(Icons.videocam_off_outlined, color: settings.colorAccent)
+            : CircularProgressIndicator(color: settings.colorAccent),
+      ),
+    );
+
+    /// The placeholder must reserve exactly the same box the loaded player
+    /// will take, so the layout does not jump once the first frame arrives.
+    if (settings.expand) return placeholder;
+    return AspectRatio(aspectRatio: settings.aspectRatio, child: placeholder);
   }
 }
