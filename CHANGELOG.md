@@ -1,3 +1,10 @@
+## 3.0.1 - Seek bar alignment fix 📏
+
+* Outside full screen the player no longer follows the device insets: the seek
+  bar is glued to the bottom of the player box and the title sits back at the
+  top, the way they already behaved in full screen. Inline, those insets belong
+  to the host app.
+
 ## 3.0.0 - New look, BoxFit support & project modernization 🎬🖼️🚀
 
 ### Interface
