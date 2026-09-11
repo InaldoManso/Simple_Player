@@ -64,24 +64,43 @@ class SimplePlayerControls extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               _buildScrim(),
-
-              /// The scrim stays edge to edge; only the interactive parts are
-              /// pushed away from notches and rounded corners.
-              SafeArea(
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    _buildTitle(),
-                    _buildPlayPause(),
-                    _buildBottomBar(),
-                  ],
-                ),
-              ),
+              _buildInterface(context),
             ],
           ),
         ),
       ),
     );
+  }
+
+  /// Only the full screen route actually reaches the edges of the device, so
+  /// only there do notches and the gesture bar need to be avoided.
+  ///
+  /// Inline the player is just a box inside the host layout: honouring the
+  /// screen insets would lift the seek bar off the bottom of the player, so the
+  /// padding is dropped instead of consumed.
+  Widget _buildInterface(BuildContext context) {
+    final Widget interface = Stack(
+      fit: StackFit.expand,
+      children: [
+        _buildTitle(),
+        _buildPlayPause(),
+        _buildBottomBar(),
+      ],
+    );
+
+    if (!isFullScreen) {
+      return MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        removeBottom: true,
+        removeLeft: true,
+        removeRight: true,
+        child: interface,
+      );
+    }
+
+    /// The scrim stays edge to edge; only the interactive parts are inset.
+    return SafeArea(child: interface);
   }
 
   /// Two soft gradients instead of a flat veil, so the video stays readable

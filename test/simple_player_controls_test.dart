@@ -84,6 +84,51 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('keeps the seek bar flush with the bottom of the inline player',
+      (tester) async {
+    /// A device with a status bar and a gesture bar. Inline, those insets
+    /// belong to the host app — the player must ignore them.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                padding: const EdgeInsets.only(top: 40, bottom: 48),
+              ),
+              /// Plain Material rather than Scaffold: Scaffold rewrites the
+              /// padding, and the padding is the point of this test.
+              child: Material(
+                child: Center(
+                  child: SizedBox(
+                    width: 320,
+                    height: 180,
+                    child: SimplePlayer(
+                      simpleController: SimpleController(),
+                      simplePlayerSettings: SimplePlayerSettings.network(
+                        path: 'https://example.com/bee.mp4',
+                        label: 'Bee',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final Rect player = tester.getRect(find.byType(SimplePlayer));
+    final Rect seekBar = tester.getRect(find.byType(Slider));
+    final Rect title = tester.getRect(find.text('Bee'));
+
+    expect(seekBar.bottom, moreOrLessEquals(player.bottom, epsilon: 0.5));
+    expect(title.top - player.top, lessThan(40));
+  });
+
   testWidgets('stays visible while the video is paused', (tester) async {
     await pumpPlayer(tester);
 
