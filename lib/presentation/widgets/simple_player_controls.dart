@@ -19,6 +19,7 @@ class SimplePlayerControls extends StatelessWidget {
   final bool isFullScreen;
   final bool isBuffering;
   final bool showMuteBadge;
+  final bool muted;
   final Duration position;
   final Duration duration;
   final Duration buffered;
@@ -28,7 +29,7 @@ class SimplePlayerControls extends StatelessWidget {
   final VoidCallback onFullScreen;
   final ValueChanged<Duration> onSeek;
   final ValueChanged<bool> onScrubbing;
-  final VoidCallback onUnmute;
+  final VoidCallback onToggleMute;
 
   const SimplePlayerControls({
     super.key,
@@ -38,6 +39,7 @@ class SimplePlayerControls extends StatelessWidget {
     required this.isFullScreen,
     required this.isBuffering,
     required this.showMuteBadge,
+    required this.muted,
     required this.position,
     required this.duration,
     required this.buffered,
@@ -47,7 +49,7 @@ class SimplePlayerControls extends StatelessWidget {
     required this.onFullScreen,
     required this.onSeek,
     required this.onScrubbing,
-    required this.onUnmute,
+    required this.onToggleMute,
   });
 
   static final DateFormatter _formatter = DateFormatter();
@@ -79,8 +81,9 @@ class SimplePlayerControls extends StatelessWidget {
           ),
         ),
 
-        /// The muted badge is the only way back to sound, so it stays put
-        /// while the rest of the interface fades away.
+        /// The sound toggle stays put while the rest of the interface fades
+        /// away: it is the only way to turn the sound on, and the only way to
+        /// turn it back off.
         if (showMuteBadge) _buildMuteBadge(),
       ],
     );
@@ -96,7 +99,7 @@ class SimplePlayerControls extends StatelessWidget {
       right: 0,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onUnmute,
+        onTap: onToggleMute,
 
         /// Padding rather than a bigger circle: keeps the badge discreet while
         /// the tap target stays comfortable.
@@ -110,11 +113,11 @@ class SimplePlayerControls extends StatelessWidget {
               color: Color(0x8A000000),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.volume_off_rounded,
+            child: Icon(
+              muted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
               size: 18,
               color: Colors.white,
-              semanticLabel: 'Turn the sound on',
+              semanticLabel: muted ? 'Turn the sound on' : 'Mute',
             ),
           ),
         ),

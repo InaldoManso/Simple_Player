@@ -144,9 +144,8 @@ class _SimplePlayerStageState extends State<SimplePlayerStage>
     await _controller.play();
   }
 
-  /// The badge is a one way switch: it only exists to turn the sound back on.
-  Future<void> _unmute() async {
-    await _controller.setVolume(1);
+  Future<void> _toggleMute() async {
+    await _controller.setVolume(_isMuted ? 1 : 0);
   }
 
   void _onTap() {
@@ -206,10 +205,15 @@ class _SimplePlayerStageState extends State<SimplePlayerStage>
             buffered: _buffered,
             playPauseProgress: _playPauseController,
 
-            /// Full screen turns the sound on by itself, so the badge belongs
-            /// to the inline player only.
-            showMuteBadge: !widget.isFullScreen && _isMuted,
-            onUnmute: _unmute,
+            /// Opting into a muted autoplay is opting into a sound toggle, so
+            /// the badge stays around after the sound is turned on — otherwise
+            /// there would be no way to mute the video again. Full screen turns
+            /// the sound on by itself, so it belongs to the inline player only.
+            showMuteBadge: !widget.isFullScreen &&
+                widget.simplePlayerSettings.autoPlay &&
+                widget.simplePlayerSettings.muteOnAutoPlay,
+            muted: _isMuted,
+            onToggleMute: _toggleMute,
             onTap: _onTap,
             onPlayPause: _togglePlayPause,
             onFullScreen: widget.onFullScreenPressed,

@@ -18,8 +18,8 @@ One tap toggles it, and it fades out on its own 3 seconds after playback
 starts. Nothing else — no settings popup, no hidden menus:
 
 - title over a soft top gradient;
-- a muted badge on the opposite corner while the sound is off, which stays
-  visible after the rest fades and turns the sound on when tapped;
+- a sound badge on the opposite corner, which stays visible after the rest
+  fades and toggles the sound on every tap;
 - a single play/pause button in the middle (a spinner while buffering);
 - elapsed / total time, the full screen toggle and an edge to edge seek bar
   showing the buffered range.
@@ -27,8 +27,10 @@ starts. Nothing else — no settings popup, no hidden menus:
 ### Muted autoplay 🔇
 
 Set `muteOnAutoPlay: true` and the video starts silent, with a small badge the
-viewer taps to turn the sound on — the usual behaviour inside a feed. Going
-full screen turns the sound on by itself, so the badge is never shown there.
+viewer taps to turn the sound on — the usual behaviour inside a feed. The badge
+stays visible afterwards, switching to a speaker icon, so the video can be muted
+again. Going full screen turns the sound on by itself, so the badge is never
+shown there.
 
 ```dart
 SimplePlayerSettings.network(

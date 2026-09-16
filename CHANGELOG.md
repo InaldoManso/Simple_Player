@@ -1,3 +1,10 @@
+## 3.1.1 - Sound badge stays around 🔊
+
+* The badge added in 3.1.0 no longer disappears once the sound is turned on:
+  it swaps to a speaker icon and stays put, so the video can be muted again.
+* It is shown for the whole life of a player that opted into `muteOnAutoPlay`,
+  still never in full screen.
+
 ## 3.1.0 - Muted autoplay 🔇
 
 * **New:** `muteOnAutoPlay` (`bool`, default `false`) starts the video silent

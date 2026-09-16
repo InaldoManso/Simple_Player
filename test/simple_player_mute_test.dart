@@ -50,7 +50,14 @@ void main() {
         .volume;
   }
 
-  final Finder badge = find.byIcon(Icons.volume_off_rounded);
+  final Finder mutedBadge = find.byIcon(Icons.volume_off_rounded);
+  final Finder soundOnBadge = find.byIcon(Icons.volume_up_rounded);
+  final Finder badge = find.byWidgetPredicate(
+    (Widget w) =>
+        w is Icon &&
+        (w.icon == Icons.volume_off_rounded ||
+            w.icon == Icons.volume_up_rounded),
+  );
 
   test('muteOnAutoPlay defaults to false', () {
     expect(
@@ -63,18 +70,25 @@ void main() {
     await pumpPlayer(tester, autoPlay: true, muteOnAutoPlay: true);
 
     expect(volume(tester), 0);
-    expect(badge, findsOneWidget);
+    expect(mutedBadge, findsOneWidget);
   });
 
-  testWidgets('tapping the badge turns the sound on and hides it',
-      (tester) async {
+  testWidgets('the badge toggles the sound both ways', (tester) async {
     await pumpPlayer(tester, autoPlay: true, muteOnAutoPlay: true);
 
-    await tester.tap(badge);
+    await tester.tap(mutedBadge);
     await tester.pump();
 
+    /// Still there, now offering to mute again.
     expect(volume(tester), 1);
-    expect(badge, findsNothing);
+    expect(soundOnBadge, findsOneWidget);
+    expect(mutedBadge, findsNothing);
+
+    await tester.tap(soundOnBadge);
+    await tester.pump();
+
+    expect(volume(tester), 0);
+    expect(mutedBadge, findsOneWidget);
   });
 
   testWidgets('the badge outlives the auto hide of the interface',
@@ -88,11 +102,12 @@ void main() {
       tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity).first).opacity,
       0,
     );
-    expect(badge, findsOneWidget);
+    expect(mutedBadge, findsOneWidget);
 
-    await tester.tap(badge);
+    await tester.tap(mutedBadge);
     await tester.pump();
     expect(volume(tester), 1);
+    expect(soundOnBadge, findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -124,7 +139,7 @@ void main() {
     /// The route itself needs real platform channels, but the unmute happens
     /// before any of them.
     expect(volume(tester), 1);
-    expect(badge, findsNothing);
+    expect(soundOnBadge, findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
