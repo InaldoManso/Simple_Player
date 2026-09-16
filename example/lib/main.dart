@@ -118,6 +118,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   aspectRatio: 1 / 1,
                   autoPlay: true,
                   loopMode: false,
+                  // Feed behaviour: starts silent with a tappable muted badge.
+                  muteOnAutoPlay: true,
                   fit: fit,
                   fullScreenFit: fullScreenFit,
                   colorAccent: Colors.red,

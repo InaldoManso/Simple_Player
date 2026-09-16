@@ -42,6 +42,7 @@ class SimplePlayer extends StatefulWidget {
   ///     aspectRatio: 16 / 9,
   ///     autoPlay: false,
   ///     loopMode: true,
+  ///     muteOnAutoPlay: true,
   ///     fit: BoxFit.cover,
   ///     fullScreenFit: BoxFit.contain,
   ///     colorAccent: Colors.red,
@@ -115,7 +116,13 @@ class _SimplePlayerState extends State<SimplePlayer> {
     /// Playback options are applied once, here, so entering full screen does
     /// not retrigger autoPlay.
     await controller.setLooping(simplePlayerSettings.loopMode);
-    if (simplePlayerSettings.autoPlay) await controller.play();
+
+    if (simplePlayerSettings.autoPlay) {
+      /// Silence has to be set before the first frame plays, otherwise the
+      /// video blurts out a moment of sound.
+      if (simplePlayerSettings.muteOnAutoPlay) await controller.setVolume(0);
+      await controller.play();
+    }
 
     if (!mounted) return;
     setState(() => loaded = true);

@@ -33,6 +33,12 @@ class _SimplePlayerScreenState extends State<SimplePlayerScreen> {
   /// Opens the full screen route, then restores the system UI and the
   /// orientation lock once the user comes back.
   Future<void> _openFullScreen() async {
+    /// Going full screen is a deliberate move, so the sound comes on by itself
+    /// and stays on after coming back.
+    if (widget.videoPlayerController.value.volume == 0) {
+      await widget.videoPlayerController.setVolume(1);
+    }
+
     final double ratio = widget.videoPlayerController.value.aspectRatio;
     await simpleAplication.lockAndUnlockScreen(lock: true, aspectRatio: ratio);
     await simpleAplication.hideNavigation(true);

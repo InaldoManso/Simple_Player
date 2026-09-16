@@ -12,6 +12,12 @@ class SimplePlayerSettings {
   final bool autoPlay;
   final bool loopMode;
   final bool expand;
+
+  /// Starts the video silent when [autoPlay] kicks in.
+  ///
+  /// While the sound is off the inline player shows a small muted badge the
+  /// viewer can tap to turn it on. Going full screen turns it on as well.
+  final bool muteOnAutoPlay;
   final Color colorAccent;
 
   /// How the video frame is scaled inside the player box (inline mode).
@@ -31,6 +37,7 @@ class SimplePlayerSettings {
     this.fit = BoxFit.contain,
     this.fullScreenFit = BoxFit.contain,
     this.expand = false,
+    this.muteOnAutoPlay = false,
   });
 
   ///
@@ -71,6 +78,12 @@ class SimplePlayerSettings {
   /// ### bool? autoPlay;
   /// If true: as soon as the Player is built the video will be played automatically.
   ///
+  /// ### bool? muteOnAutoPlay; (default false)
+  /// If true the video starts silent when [autoPlay] is on — the usual way a
+  /// video behaves inside a feed. A small muted badge is then shown on the
+  /// inline player, and tapping it turns the sound on. Opening full screen
+  /// turns the sound on too, so the badge never shows up there.
+  ///
   /// ### bool? loopMode;
   /// If true: As soon as the video finishes playing, it will restart automatically.
   ///
@@ -84,6 +97,7 @@ class SimplePlayerSettings {
     bool? autoPlay,
     bool? loopMode,
     bool? expand,
+    bool? muteOnAutoPlay,
     BoxFit? fit,
     BoxFit? fullScreenFit,
     Color? colorAccent,
@@ -96,6 +110,7 @@ class SimplePlayerSettings {
       autoPlay: autoPlay ?? false,
       loopMode: loopMode ?? false,
       expand: expand ?? false,
+      muteOnAutoPlay: muteOnAutoPlay ?? false,
       fit: fit ?? BoxFit.contain,
       fullScreenFit: fullScreenFit ?? BoxFit.contain,
       colorAccent: colorAccent ?? Colors.red,
@@ -110,6 +125,7 @@ class SimplePlayerSettings {
     bool? autoPlay,
     bool? loopMode,
     bool? expand,
+    bool? muteOnAutoPlay,
     BoxFit? fit,
     BoxFit? fullScreenFit,
     Color? colorAccent,
@@ -122,6 +138,7 @@ class SimplePlayerSettings {
       autoPlay: autoPlay ?? false,
       loopMode: loopMode ?? false,
       expand: expand ?? false,
+      muteOnAutoPlay: muteOnAutoPlay ?? false,
       fit: fit ?? BoxFit.contain,
       fullScreenFit: fullScreenFit ?? BoxFit.contain,
       colorAccent: colorAccent ?? Colors.red,

@@ -38,6 +38,12 @@ class SimpleController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// ## 🔊 Change the volume (0.0 is silent, 1.0 is full)
+  Future<void> setVolume(double volume) async {
+    await videoPlayerController.setVolume(volume);
+    notifyListeners();
+  }
+
   /// ## ⏱️ Jump to a given point of the video
   Future<void> seekTo(Duration position) async {
     await videoPlayerController.seekTo(position);

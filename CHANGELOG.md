@@ -1,3 +1,14 @@
+## 3.1.0 - Muted autoplay 🔇
+
+* **New:** `muteOnAutoPlay` (`bool`, default `false`) starts the video silent
+  when `autoPlay` is on — the way a video behaves inside a feed.
+* While the sound is off the inline player shows a small muted badge. It stays
+  put while the rest of the interface fades away, since it is the only way back
+  to sound, and tapping it turns the sound on.
+* Opening full screen turns the sound on by itself, so the badge never shows up
+  there — and it stays on after coming back.
+* **New:** `simpleController.setVolume(double)`.
+
 ## 3.0.1 - Seek bar alignment fix 📏
 
 * Outside full screen the player no longer follows the device insets: the seek

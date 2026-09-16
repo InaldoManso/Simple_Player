@@ -47,6 +47,7 @@ class _SimplePlayerStageState extends State<SimplePlayerStage>
   bool _scrubbing = false;
   bool _isPlaying = false;
   bool _isBuffering = false;
+  bool _isMuted = false;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
   Duration _buffered = Duration.zero;
@@ -58,6 +59,7 @@ class _SimplePlayerStageState extends State<SimplePlayerStage>
     super.initState();
 
     _isPlaying = _controller.value.isPlaying;
+    _isMuted = _controller.value.volume == 0;
     _playPauseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -110,6 +112,7 @@ class _SimplePlayerStageState extends State<SimplePlayerStage>
         _buffered = buffered;
         _isPlaying = value.isPlaying;
         _isBuffering = value.isBuffering;
+        _isMuted = value.volume == 0;
       });
     }
 
@@ -139,6 +142,11 @@ class _SimplePlayerStageState extends State<SimplePlayerStage>
     /// Restart instead of sitting on the last frame.
     if (_ended) await _controller.seekTo(Duration.zero);
     await _controller.play();
+  }
+
+  /// The badge is a one way switch: it only exists to turn the sound back on.
+  Future<void> _unmute() async {
+    await _controller.setVolume(1);
   }
 
   void _onTap() {
@@ -197,6 +205,11 @@ class _SimplePlayerStageState extends State<SimplePlayerStage>
             duration: _duration,
             buffered: _buffered,
             playPauseProgress: _playPauseController,
+
+            /// Full screen turns the sound on by itself, so the badge belongs
+            /// to the inline player only.
+            showMuteBadge: !widget.isFullScreen && _isMuted,
+            onUnmute: _unmute,
             onTap: _onTap,
             onPlayPause: _togglePlayPause,
             onFullScreen: widget.onFullScreenPressed,

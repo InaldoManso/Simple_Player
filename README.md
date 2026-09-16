@@ -8,6 +8,7 @@
 - Fit (BoxFit) — how the **video frame** is scaled inline (default `BoxFit.contain`)
 - FullScreenFit (BoxFit) — how the **video frame** is scaled in full screen (default `BoxFit.contain`)
 - AutoPlay (bool)
+- MuteOnAutoPlay (bool)
 - LoopMode (bool)
 - ColorAccent (Color)
 
@@ -17,9 +18,25 @@ One tap toggles it, and it fades out on its own 3 seconds after playback
 starts. Nothing else — no settings popup, no hidden menus:
 
 - title over a soft top gradient;
+- a muted badge on the opposite corner while the sound is off, which stays
+  visible after the rest fades and turns the sound on when tapped;
 - a single play/pause button in the middle (a spinner while buffering);
 - elapsed / total time, the full screen toggle and an edge to edge seek bar
   showing the buffered range.
+
+### Muted autoplay 🔇
+
+Set `muteOnAutoPlay: true` and the video starts silent, with a small badge the
+viewer taps to turn the sound on — the usual behaviour inside a feed. Going
+full screen turns the sound on by itself, so the badge is never shown there.
+
+```dart
+SimplePlayerSettings.network(
+    path: url,
+    autoPlay: true,
+    muteOnAutoPlay: true,
+),
+```
 
 ### Fitting the video 🖼️
 
@@ -98,6 +115,9 @@ simpleController.pause()
 
 // Playback speed
 simpleController.setSpeed(1.5);
+
+// Volume (0.0 is silent, 1.0 is full)
+simpleController.setVolume(0.0);
 
 // Jump to a point of the video
 simpleController.seekTo(const Duration(seconds: 30));

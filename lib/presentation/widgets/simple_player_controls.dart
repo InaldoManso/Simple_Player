@@ -18,6 +18,7 @@ class SimplePlayerControls extends StatelessWidget {
   final bool visible;
   final bool isFullScreen;
   final bool isBuffering;
+  final bool showMuteBadge;
   final Duration position;
   final Duration duration;
   final Duration buffered;
@@ -27,6 +28,7 @@ class SimplePlayerControls extends StatelessWidget {
   final VoidCallback onFullScreen;
   final ValueChanged<Duration> onSeek;
   final ValueChanged<bool> onScrubbing;
+  final VoidCallback onUnmute;
 
   const SimplePlayerControls({
     super.key,
@@ -35,6 +37,7 @@ class SimplePlayerControls extends StatelessWidget {
     required this.visible,
     required this.isFullScreen,
     required this.isBuffering,
+    required this.showMuteBadge,
     required this.position,
     required this.duration,
     required this.buffered,
@@ -44,28 +47,75 @@ class SimplePlayerControls extends StatelessWidget {
     required this.onFullScreen,
     required this.onSeek,
     required this.onScrubbing,
+    required this.onUnmute,
   });
 
   static final DateFormatter _formatter = DateFormatter();
 
   @override
   Widget build(BuildContext context) {
-    /// The detector sits outside the fade so a tap brings the interface back
-    /// while it is hidden; [IgnorePointer] keeps the faded out buttons inert.
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: AnimatedOpacity(
-        opacity: visible ? 1 : 0,
-        duration: const Duration(milliseconds: 200),
-        child: IgnorePointer(
-          ignoring: !visible,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              _buildScrim(),
-              _buildInterface(context),
-            ],
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        /// The detector sits outside the fade so a tap brings the interface
+        /// back while it is hidden; [IgnorePointer] keeps the faded out
+        /// buttons inert.
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: AnimatedOpacity(
+            opacity: visible ? 1 : 0,
+            duration: const Duration(milliseconds: 200),
+            child: IgnorePointer(
+              ignoring: !visible,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _buildScrim(),
+                  _buildInterface(context),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        /// The muted badge is the only way back to sound, so it stays put
+        /// while the rest of the interface fades away.
+        if (showMuteBadge) _buildMuteBadge(),
+      ],
+    );
+  }
+
+  /// Small round badge, the way a muted video is flagged inside a feed.
+  ///
+  /// It is placed opposite the title instead of at the bottom, where it would
+  /// fight the seek bar and the full screen button for the same corner.
+  Widget _buildMuteBadge() {
+    return Positioned(
+      top: 0,
+      right: 0,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onUnmute,
+
+        /// Padding rather than a bigger circle: keeps the badge discreet while
+        /// the tap target stays comfortable.
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Container(
+            width: 32,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Color(0x8A000000),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.volume_off_rounded,
+              size: 18,
+              color: Colors.white,
+              semanticLabel: 'Turn the sound on',
+            ),
           ),
         ),
       ),
@@ -131,7 +181,7 @@ class SimplePlayerControls extends StatelessWidget {
       left: 0,
       right: 0,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        padding: EdgeInsets.fromLTRB(16, 12, showMuteBadge ? 62 : 16, 0),
         child: Text(
           title,
           maxLines: 1,
